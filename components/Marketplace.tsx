@@ -1,13 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ShoppingBag, Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
+import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  origin: string;
+  image: string;
+  tag: string;
+  sold: number;
+}
+
+interface MarketplaceProps {
+  onProductClick?: (product: Product) => void;
+}
 
 const categories = ["全部", "有机蔬菜", "时令水果", "乡村民宿", "手工艺品"];
 
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: 1,
     name: "高山有机红薯",
@@ -90,110 +104,90 @@ const mockProducts = [
   },
 ];
 
-export default function Marketplace() {
+export default function Marketplace({ onProductClick }: MarketplaceProps) {
   const [selectedCategory, setSelectedCategory] = useState("全部");
-  const router = useRouter();
 
   const filteredProducts =
     selectedCategory === "全部"
       ? mockProducts
       : mockProducts.filter((p) => p.category === selectedCategory);
 
-  const handleProductClick = (productId: number) => {
-    router.push(`/product`);
+  const handleProductClick = (product: Product) => {
+    if (onProductClick) {
+      onProductClick(product);
+    }
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="sticky top-0 z-40">
-        <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-                积分集市
-              </h1>
-              <p className="text-sm text-slate-500 mt-0.5">
-                用汗水换取新鲜农产品
-              </p>
-            </div>
-            <div className="flex items-center space-x-2 bg-gradient-to-r from-amber-100 to-orange-100 px-3 py-1.5 rounded-full border border-amber-200/50">
-              <Coins className="w-4 h-4 text-amber-500" />
-              <span className="text-sm font-bold text-amber-600">2,580</span>
-            </div>
-          </div>
+    <div className="bg-white rounded-3xl shadow-lg shadow-emerald-900/5 border border-slate-100 overflow-hidden">
+      <div className="p-4 border-b border-slate-100">
+        <div className="flex space-x-2 overflow-x-auto scrollbar-hide pb-2">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                selectedCategory === category
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
+      </div>
 
-        <div className="bg-white/60 backdrop-blur-md px-4 py-3 border-b border-slate-200/50">
-          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                  selectedCategory === category
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      <main className="px-4 py-4">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="p-4">
+        <div className="grid grid-cols-2 gap-3">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              onClick={() => handleProductClick(product.id)}
-              className="group bg-white rounded-3xl overflow-hidden shadow-sm shadow-slate-200/50 border border-slate-100 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-emerald-900/5 hover:-translate-y-1"
+              onClick={() => handleProductClick(product)}
+              className="group bg-gradient-to-br from-slate-50 to-stone-50 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-emerald-900/5 hover:-translate-y-1"
             >
               <div className="relative aspect-square overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
-                <div
-                  className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110"
-                >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent z-10" />
+                <div className="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-emerald-50/50 to-teal-50/50 transition-transform duration-500 group-hover:scale-105">
                   {product.image}
                 </div>
                 <div className="absolute top-2 left-2 z-20">
-                  <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-emerald-700 shadow-sm">
+                  <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-emerald-700 shadow-sm">
                     {product.tag}
                   </span>
                 </div>
                 <div className="absolute bottom-2 right-2 z-20">
-                  <span className="px-2 py-1 bg-black/40 backdrop-blur-sm rounded-full text-xs text-white/90">
+                  <span className="px-2 py-1 bg-black/30 backdrop-blur-sm rounded-full text-xs text-white/90">
                     已售 {product.sold}
                   </span>
                 </div>
               </div>
 
               <div className="p-3">
-                <h3 className="font-bold text-slate-800 text-sm line-clamp-2 leading-tight mb-2 group-hover:text-emerald-600 transition-colors">
+                <h3 className="font-bold text-slate-800 text-xs line-clamp-2 leading-tight mb-2 group-hover:text-emerald-600 transition-colors">
                   {product.name}
                 </h3>
-                <div className="flex items-center gap-1 mb-3">
+                <div className="flex items-center gap-1 mb-2">
                   <MapPin className="w-3 h-3 text-slate-400" />
-                  <span className="text-xs text-slate-400">{product.origin}</span>
+                  <span className="text-xs text-slate-400 truncate">{product.origin}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <Coins className="w-4 h-4 text-emerald-500" />
+                    <Coins className="w-4 h-4 text-amber-500" />
                     <span className="text-lg font-extrabold text-emerald-600">
                       {product.price}
                     </span>
                   </div>
-                  <button className="w-8 h-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-                    <ArrowRight className="w-4 h-4 text-white" />
-                  </button>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <ArrowRight className="w-3 h-3 text-white" />
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 p-4 bg-gradient-to-br from-emerald-50 via-teal-50 to-stone-100 rounded-3xl border border-emerald-100">
+        <div className="mt-6 p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 rounded-2xl border border-amber-100">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 flex-shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
@@ -206,9 +200,7 @@ export default function Marketplace() {
             </div>
           </div>
         </div>
-      </main>
-
-      <BottomNavigation />
+      </div>
     </div>
   );
 }
