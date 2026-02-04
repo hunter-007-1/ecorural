@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>乡村碳足迹 - EcoRural</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'eco-green': '#10B981',
+            'earth-brown': '#D97706',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .safe-area-inset-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="app">
+    <!-- 首页 -->
+    <div id="page-dashboard" class="page min-h-screen bg-gray-50 pb-20">
+      <!-- Header -->
+      <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-eco-green/20 flex items-center justify-center text-xl">
+              👤
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">张三</p>
+              <p class="text-xs text-gray-500">欢迎回来</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 bg-eco-green/10 px-3 py-1.5 rounded-full">
+            <span class="text-eco-green">💰</span>
+            <span class="text-sm font-semibold text-eco-green">2,580</span>
+            <span class="text-xs text-eco-green">绿农币</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-4 py-4 space-y-4">
+        <!-- 今日核心数据 -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">今日数据</h2>
+          <div class="grid grid-cols-3 gap-3">
+            <!-- 碳减排量 -->
+            <div class="flex flex-col items-center p-3 bg-eco-green/5 rounded-xl">
+              <div class="w-12 h-12 rounded-full bg-eco-green/20 flex items-center justify-center mb-2">
+                <span class="text-2xl">🌿</span>
+              </div>
+              <p class="text-2xl font-bold text-eco-green">2.5</p>
+              <p class="text-xs text-gray-600 mt-1">减碳 (kg)</p>
+            </div>
+
+            <!-- 运动步数 -->
+            <div class="flex flex-col items-center p-3 bg-blue-50 rounded-xl">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                <span class="text-2xl">👣</span>
+              </div>
+              <p class="text-2xl font-bold text-blue-600">8.5k</p>
+              <p class="text-xs text-gray-600 mt-1">步数</p>
+            </div>
+
+            <!-- 卡路里 -->
+            <div class="flex flex-col items-center p-3 bg-orange-50 rounded-xl">
+              <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+                <span class="text-2xl">🔥</span>
+              </div>
+              <p class="text-2xl font-bold text-orange-600">320</p>
+              <p class="text-xs text-gray-600 mt-1">卡路里</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 快捷入口 -->
+        <section class="grid grid-cols-2 gap-3">
+          <button class="bg-gradient-to-br from-eco-green to-emerald-600 text-white rounded-2xl p-4 shadow-md flex flex-col items-center justify-center space-y-2 active:scale-95 transition-transform">
+            <span class="text-4xl">🚴</span>
+            <span class="font-semibold">开启低碳骑行</span>
+          </button>
+          <button class="bg-gradient-to-br from-earth-brown to-amber-600 text-white rounded-2xl p-4 shadow-md flex flex-col items-center justify-center space-y-2 active:scale-95 transition-transform">
+            <span class="text-4xl">🌲</span>
+            <span class="font-semibold">上传植树打卡</span>
+          </button>
+        </section>
+
+        <!-- 今日低碳助农路线推荐 -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">今日低碳助农路线推荐</h2>
+          <div class="space-y-3">
+            <div class="bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl p-4 border border-eco-green/20">
+              <div class="flex items-start space-x-3">
+                <div class="text-4xl">🌾</div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-semibold text-gray-900">环湖绿道 x 助农采摘</h3>
+                    <span class="text-xs bg-eco-green text-white px-2 py-0.5 rounded-full">
+                      +50 绿农币
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-2">5km 环湖骑行路线，终点可参与有机蔬菜采摘</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500">
+                    <div class="flex items-center space-x-1">
+                      <span>📍</span>
+                      <span>5km</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl p-4 border border-eco-green/20">
+              <div class="flex items-start space-x-3">
+                <div class="text-4xl">🏔️</div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-semibold text-gray-900">山间步道 x 生态农场</h3>
+                    <span class="text-xs bg-eco-green text-white px-2 py-0.5 rounded-full">
+                      +30 绿农币
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-2">3km 山间步道，参观生态农场，了解有机农业</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500">
+                    <div class="flex items-center space-x-1">
+                      <span>📍</span>
+                      <span>3km</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 运动记录页 -->
+    <div id="page-activity" class="page min-h-screen bg-gray-50 pb-20 hidden">
+      <!-- Header -->
+      <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="px-4 py-3">
+          <h1 class="text-lg font-semibold text-gray-900">运动记录</h1>
+        </div>
+      </header>
+
+      <!-- 地图容器 -->
+      <div class="relative w-full h-64 bg-gradient-to-br from-eco-green/20 to-emerald-100">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="text-center">
+            <span class="text-6xl text-eco-green/40">📍</span>
+            <p class="text-sm text-gray-600 mt-2">地图加载中...</p>
+          </div>
+        </div>
+
+        <!-- 实时数据面板 -->
+        <div class="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="text-center">
+              <div class="flex items-center justify-center mb-1">
+                <span class="text-gray-500">📍</span>
+              </div>
+              <p class="text-2xl font-bold text-gray-900" id="activity-distance">0.00</p>
+              <p class="text-xs text-gray-500">距离 (km)</p>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center mb-1">
+                <span class="text-gray-500">⏱️</span>
+              </div>
+              <p class="text-2xl font-bold text-gray-900" id="activity-duration">0:00</p>
+              <p class="text-xs text-gray-500">时长 (min)</p>
+            </div>
+            <div class="text-center">
+              <div class="flex items-center justify-center mb-1">
+                <span class="text-eco-green">🌿</span>
+              </div>
+              <p class="text-2xl font-bold text-eco-green" id="activity-carbon">0</p>
+              <p class="text-xs text-gray-500">减碳 (g)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main class="px-4 py-6 space-y-6">
+        <!-- 模式切换 -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm">
+          <h2 class="text-sm font-medium text-gray-700 mb-3">运动模式</h2>
+          <div class="grid grid-cols-3 gap-3">
+            <button data-mode="walking" class="mode-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 border-eco-green bg-eco-green/10">
+              <span class="text-2xl mb-1">👣</span>
+              <span class="text-xs font-medium text-eco-green">步行</span>
+            </button>
+            <button data-mode="cycling" class="mode-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 border-gray-200 bg-gray-50">
+              <span class="text-2xl mb-1 text-gray-400">🚴</span>
+              <span class="text-xs font-medium text-gray-500">骑行</span>
+            </button>
+            <button data-mode="transit" class="mode-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 border-gray-200 bg-gray-50">
+              <span class="text-2xl mb-1 text-gray-400">🚌</span>
+              <span class="text-xs font-medium text-gray-500">公共交通</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 开始/暂停按钮 -->
+        <div class="flex justify-center">
+          <button id="activity-toggle" class="w-24 h-24 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-eco-green">
+            <span class="text-5xl text-white">▶</span>
+          </button>
+        </div>
+
+        <!-- 提示信息 -->
+        <div class="text-center">
+          <p class="text-sm text-gray-500" id="activity-hint">点击开始记录您的低碳出行</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- 积分集市页 -->
+    <div id="page-marketplace" class="page min-h-screen bg-gray-50 pb-20 hidden">
+      <!-- Header -->
+      <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="px-4 py-3 flex items-center justify-between">
+          <h1 class="text-lg font-semibold text-gray-900">积分集市</h1>
+          <div class="flex items-center space-x-1 bg-eco-green/10 px-3 py-1.5 rounded-full">
+            <span class="text-eco-green">💰</span>
+            <span class="text-sm font-semibold text-eco-green">2580</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-4 py-4">
+        <!-- 筛选栏 -->
+        <section class="mb-4">
+          <div class="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button data-category="全部" class="category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-eco-green text-white shadow-md">
+              全部
+            </button>
+            <button data-category="有机蔬菜" class="category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white text-gray-700 border border-gray-200">
+              有机蔬菜
+            </button>
+            <button data-category="时令水果" class="category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white text-gray-700 border border-gray-200">
+              时令水果
+            </button>
+            <button data-category="乡村民宿" class="category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white text-gray-700 border border-gray-200">
+              乡村民宿
+            </button>
+            <button data-category="手工艺品" class="category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white text-gray-700 border border-gray-200">
+              手工艺品
+            </button>
+          </div>
+        </section>
+
+        <!-- 商品列表 -->
+        <section>
+          <div id="products-grid" class="grid grid-cols-2 gap-3">
+            <!-- 商品将通过 JS 动态生成 -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 个人中心页 -->
+    <div id="page-profile" class="page min-h-screen bg-gray-50 pb-20 hidden">
+      <!-- Header -->
+      <header class="bg-gradient-to-br from-eco-green to-emerald-600 text-white">
+        <div class="px-4 py-6">
+          <div class="flex items-center space-x-4 mb-4">
+            <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl border-2 border-white/30">
+              👤
+            </div>
+            <div>
+              <h1 class="text-xl font-bold">张三</h1>
+              <p class="text-sm text-white/80">碳足迹用户</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-4 -mt-4 space-y-4">
+        <!-- 碳账户卡片 -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">碳账户</h2>
+            <span class="text-eco-green text-xl">🌿</span>
+          </div>
+          <div class="bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl p-4">
+            <div class="text-center">
+              <p class="text-3xl font-bold text-eco-green mb-1">125.8</p>
+              <p class="text-sm text-gray-600">累计减碳总量 (kg)</p>
+            </div>
+          </div>
+
+          <!-- 环保勋章 -->
+          <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">环保勋章</h3>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-gradient-to-br from-earth-brown/10 to-amber-50 rounded-xl p-3 text-center border border-earth-brown/20">
+                <div class="text-3xl mb-1">🏆</div>
+                <p class="text-xs font-semibold text-gray-900">减碳先锋</p>
+              </div>
+              <div class="bg-gradient-to-br from-earth-brown/10 to-amber-50 rounded-xl p-3 text-center border border-earth-brown/20">
+                <div class="text-3xl mb-1">🌱</div>
+                <p class="text-xs font-semibold text-gray-900">绿色出行</p>
+              </div>
+              <div class="bg-gradient-to-br from-earth-brown/10 to-amber-50 rounded-xl p-3 text-center border border-earth-brown/20">
+                <div class="text-3xl mb-1">🌾</div>
+                <p class="text-xs font-semibold text-gray-900">助农达人</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 标签切换 -->
+        <section class="bg-white rounded-2xl p-1 shadow-sm">
+          <div class="flex space-x-1">
+            <button data-tab="orders" class="tab-btn flex-1 py-2 rounded-xl text-sm font-medium transition-all bg-eco-green text-white">
+              我的订单
+            </button>
+            <button data-tab="activities" class="tab-btn flex-1 py-2 rounded-xl text-sm font-medium transition-all text-gray-600">
+              我的足迹
+            </button>
+          </div>
+        </section>
+
+        <!-- 我的订单 -->
+        <section id="orders-section" class="space-y-3">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start space-x-3">
+              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-eco-green/10 to-emerald-50 flex items-center justify-center text-3xl">
+                🍠
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 mb-1">高山有机红薯</h3>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="inline-flex items-center space-x-1 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                    <span>📦</span>
+                    <span>待发货</span>
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500">2024-03-15</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start space-x-3">
+              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-eco-green/10 to-emerald-50 flex items-center justify-center text-3xl">
+                🍎
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 mb-1">有机苹果</h3>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="inline-flex items-center space-x-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                    <span>🚚</span>
+                    <span>待收货</span>
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500">2024-03-12</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start space-x-3">
+              <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-eco-green/10 to-emerald-50 flex items-center justify-center text-3xl">
+                🥬
+              </div>
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 mb-1">新鲜有机白菜</h3>
+                <div class="flex items-center space-x-2 mb-2">
+                  <span class="inline-flex items-center space-x-1 text-xs bg-eco-green/10 text-eco-green px-2 py-0.5 rounded-full">
+                    <span>✅</span>
+                    <span>已完成</span>
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500">2024-03-10</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 我的足迹 -->
+        <section id="activities-section" class="space-y-3 hidden">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">环湖绿道</h3>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs bg-eco-green/10 text-eco-green px-2 py-0.5 rounded-full">骑行</span>
+                  <span class="text-xs text-gray-500">2024-03-15</span>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 pt-3 border-t border-gray-100">
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">5.2</p>
+                <p class="text-xs text-gray-500">距离 (km)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">25</p>
+                <p class="text-xs text-gray-500">时长 (min)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-eco-green">1.2</p>
+                <p class="text-xs text-gray-500">减碳 (kg)</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">山间步道</h3>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs bg-eco-green/10 text-eco-green px-2 py-0.5 rounded-full">步行</span>
+                  <span class="text-xs text-gray-500">2024-03-14</span>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 pt-3 border-t border-gray-100">
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">3.5</p>
+                <p class="text-xs text-gray-500">距离 (km)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">45</p>
+                <p class="text-xs text-gray-500">时长 (min)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-eco-green">0.8</p>
+                <p class="text-xs text-gray-500">减碳 (kg)</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">乡村公路</h3>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs bg-eco-green/10 text-eco-green px-2 py-0.5 rounded-full">骑行</span>
+                  <span class="text-xs text-gray-500">2024-03-13</span>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 pt-3 border-t border-gray-100">
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">8.1</p>
+                <p class="text-xs text-gray-500">距离 (km)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-gray-900">35</p>
+                <p class="text-xs text-gray-500">时长 (min)</p>
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-bold text-eco-green">1.8</p>
+                <p class="text-xs text-gray-500">减碳 (kg)</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-inset-bottom">
+      <div class="flex justify-around items-center h-16 px-2">
+        <button data-page="dashboard" class="nav-btn flex flex-col items-center justify-center flex-1 h-full transition-colors text-eco-green">
+          <span class="text-2xl">🏠</span>
+          <span class="text-xs mt-1 font-semibold">首页</span>
+        </button>
+        <button data-page="activity" class="nav-btn flex flex-col items-center justify-center flex-1 h-full transition-colors text-gray-500">
+          <span class="text-2xl">🏃</span>
+          <span class="text-xs mt-1">运动</span>
+        </button>
+        <button data-page="marketplace" class="nav-btn flex flex-col items-center justify-center flex-1 h-full transition-colors text-gray-500">
+          <span class="text-2xl">🛒</span>
+          <span class="text-xs mt-1">集市</span>
+        </button>
+        <button data-page="profile" class="nav-btn flex flex-col items-center justify-center flex-1 h-full transition-colors text-gray-500">
+          <span class="text-2xl">👤</span>
+          <span class="text-xs mt-1">我的</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    // Mock Data
+    const products = [
+      { id: 1, name: "高山有机红薯", price: 500, category: "有机蔬菜", origin: "xx村直供", image: "🍠" },
+      { id: 2, name: "新鲜有机白菜", price: 300, category: "有机蔬菜", origin: "xx村直供", image: "🥬" },
+      { id: 3, name: "有机苹果", price: 800, category: "时令水果", origin: "xx村直供", image: "🍎" },
+      { id: 4, name: "有机草莓", price: 1200, category: "时令水果", origin: "xx村直供", image: "🍓" },
+      { id: 5, name: "乡村民宿体验券", price: 2000, category: "乡村民宿", origin: "xx村直供", image: "🏡" },
+      { id: 6, name: "手工编织篮", price: 600, category: "手工艺品", origin: "xx村直供", image: "🧺" },
+      { id: 7, name: "有机胡萝卜", price: 400, category: "有机蔬菜", origin: "xx村直供", image: "🥕" },
+      { id: 8, name: "有机橙子", price: 900, category: "时令水果", origin: "xx村直供", image: "🍊" },
+    ];
+
+    // 页面切换
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.add('hidden');
+      });
+      document.getElementById(`page-${pageName}`).classList.remove('hidden');
+
+      // 更新导航栏状态
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isActive = btn.dataset.page === pageName;
+        btn.className = `nav-btn flex flex-col items-center justify-center flex-1 h-full transition-colors ${isActive ? 'text-eco-green' : 'text-gray-500'}`;
+        btn.querySelector('span:first-child').style.color = isActive ? '#10B981' : '#6B7280';
+        const label = btn.querySelector('span:last-child');
+        label.className = `text-xs mt-1 ${isActive ? 'font-semibold' : ''}`;
+      });
+    }
+
+    // 底部导航栏事件
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showPage(btn.dataset.page);
+      });
+    });
+
+    // 商品筛选
+    let selectedCategory = '全部';
+    function renderProducts() {
+      const filtered = selectedCategory === '全部' 
+        ? products 
+        : products.filter(p => p.category === selectedCategory);
+      
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = filtered.map(product => `
+        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+          <div class="w-full h-32 bg-gradient-to-br from-eco-green/10 to-emerald-50 flex items-center justify-center text-5xl">
+            ${product.image}
+          </div>
+          <div class="p-3">
+            <h3 class="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">${product.name}</h3>
+            <div class="flex items-center space-x-1 mb-2">
+              <span class="text-xs text-gray-500">📍 ${product.origin}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1">
+                <span class="text-earth-brown">💰</span>
+                <span class="text-sm font-bold text-earth-brown">${product.price}</span>
+              </div>
+              <button class="bg-eco-green text-white text-xs px-3 py-1 rounded-full font-medium active:scale-95 transition-transform">
+                立即兑换
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedCategory = btn.dataset.category;
+        document.querySelectorAll('.category-btn').forEach(b => {
+          b.className = `category-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+            b.dataset.category === selectedCategory
+              ? 'bg-eco-green text-white shadow-md'
+              : 'bg-white text-gray-700 border border-gray-200'
+          }`;
+        });
+        renderProducts();
+      });
+    });
+
+    // 运动模式切换
+    let selectedMode = 'walking';
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedMode = btn.dataset.mode;
+        document.querySelectorAll('.mode-btn').forEach(b => {
+          const isSelected = b.dataset.mode === selectedMode;
+          b.className = `mode-btn flex flex-col items-center justify-center p-3 rounded-xl border-2 ${
+            isSelected
+              ? 'border-eco-green bg-eco-green/10'
+              : 'border-gray-200 bg-gray-50'
+          }`;
+          const icon = b.querySelector('span:first-child');
+          const label = b.querySelector('span:last-child');
+          if (isSelected) {
+            icon.style.color = selectedMode === 'walking' ? '#2563EB' : selectedMode === 'cycling' ? '#10B981' : '#9333EA';
+            label.className = 'text-xs font-medium text-eco-green';
+          } else {
+            icon.style.color = '#9CA3AF';
+            label.className = 'text-xs font-medium text-gray-500';
+          }
+        });
+      });
+    });
+
+    // 运动记录功能
+    let isActive = false;
+    let distance = 0;
+    let duration = 0;
+    let carbonReduction = 0;
+    let intervalId = null;
+
+    const toggleBtn = document.getElementById('activity-toggle');
+    const distanceEl = document.getElementById('activity-distance');
+    const durationEl = document.getElementById('activity-duration');
+    const carbonEl = document.getElementById('activity-carbon');
+    const hintEl = document.getElementById('activity-hint');
+
+    toggleBtn.addEventListener('click', () => {
+      isActive = !isActive;
+      
+      if (isActive) {
+        toggleBtn.className = 'w-24 h-24 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-red-500';
+        toggleBtn.innerHTML = '<span class="text-5xl text-white">⏸</span>';
+        hintEl.textContent = '正在记录运动数据...';
+        
+        intervalId = setInterval(() => {
+          distance += 0.01;
+          duration += 1;
+          carbonReduction += 0.5;
+          
+          distanceEl.textContent = distance.toFixed(2);
+          const mins = Math.floor(duration / 60);
+          const secs = String(duration % 60).padStart(2, '0');
+          durationEl.textContent = `${mins}:${secs}`;
+          carbonEl.textContent = Math.floor(carbonReduction);
+        }, 1000);
+      } else {
+        toggleBtn.className = 'w-24 h-24 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 bg-eco-green';
+        toggleBtn.innerHTML = '<span class="text-5xl text-white">▶</span>';
+        hintEl.textContent = '点击开始记录您的低碳出行';
+        
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+    });
+
+    // 个人中心标签切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.className = `tab-btn flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
+            b.dataset.tab === tab ? 'bg-eco-green text-white' : 'text-gray-600'
+          }`;
+        });
+        
+        if (tab === 'orders') {
+          document.getElementById('orders-section').classList.remove('hidden');
+          document.getElementById('activities-section').classList.add('hidden');
+        } else {
+          document.getElementById('orders-section').classList.add('hidden');
+          document.getElementById('activities-section').classList.remove('hidden');
+        }
+      });
+    });
+
+    // 初始化
+    renderProducts();
+    showPage('dashboard');
+  </script>
+</body>
+</html>
+
+
+
