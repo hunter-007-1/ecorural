@@ -13,6 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import BadgeGallery from "./BadgeGallery";
 
 // Mock Data
 const mockData = {
@@ -117,21 +118,8 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* 环保勋章 */}
-          <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">环保勋章</h3>
-            <div className="grid grid-cols-3 gap-2">
-              {data.badges.map((badge) => (
-                <div
-                  key={badge.id}
-                  className="bg-gradient-to-br from-earth-brown/10 to-amber-50 rounded-xl p-3 text-center border border-earth-brown/20"
-                >
-                  <div className="text-3xl mb-1">{badge.icon}</div>
-                  <p className="text-xs font-semibold text-gray-900">{badge.name}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+{/* 环保勋章 */}
+          <BadgeGallery />
         </section>
 
         {/* 标签切换 */}

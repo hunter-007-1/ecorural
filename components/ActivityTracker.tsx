@@ -2,16 +2,17 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Play, Pause, MapPin, Clock, Leaf, Footprints, Bike, Bus } from "lucide-react";
+import { Play, Pause, Clock, Leaf, Footprints, Bike, Bus } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import MetricsTranslator from "./MetricsTranslator";
 
 const EcoMap = dynamic(() => import("./EcoMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl">
       <div className="text-center">
-        <div className="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-2" />
-        <p className="text-sm text-gray-500">地图加载中...</p>
+        <div className="animate-spin w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full mx-auto mb-2" />
+        <p className="text-xs text-slate-500">加载中...</p>
       </div>
     </div>
   ),
@@ -21,7 +22,7 @@ const mockData = {
   distance: 0,
   duration: 0,
   carbonReduction: 0,
-  mode: "walking" as "walking" | "cycling" | "transit",
+  caloriesBurned: 0,
 };
 
 export default function ActivityTracker() {
@@ -38,6 +39,7 @@ export default function ActivityTracker() {
           distance: prev.distance + 0.01,
           duration: prev.duration + 1,
           carbonReduction: prev.carbonReduction + 0.5,
+          caloriesBurned: prev.caloriesBurned + 3,
         }));
       }, 1000);
     } else {
@@ -46,78 +48,78 @@ export default function ActivityTracker() {
         intervalRef.current = null;
       }
     }
-
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isActive]);
 
-  const handleStart = () => {
-    setIsActive(!isActive);
-  };
+  const handleStart = () => setIsActive(!isActive);
 
-  const handleArrive = (village: any) => {
-    console.log("到达驿站:", village);
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const modeConfig = {
     walking: { icon: Footprints, label: "步行", color: "text-blue-600" },
-    cycling: { icon: Bike, label: "骑行", color: "text-green-600" },
-    transit: { icon: Bus, label: "公共交通", color: "text-purple-600" },
+    cycling: { icon: Bike, label: "骑行", color: "text-emerald-600" },
+    transit: { icon: Bus, label: "公交", color: "text-purple-600" },
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">运动记录</h1>
-          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-            地图模式
-          </span>
-        </div>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      <header className="bg-white shadow-sm sticky top-0 z-40 px-4 py-3">
+        <h1 className="text-lg font-bold text-slate-800">运动记录</h1>
       </header>
 
-      <div className="relative w-full h-72">
-        <EcoMap onArrive={handleArrive} />
-
-        <div className="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg z-[400]">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <MapPin className="w-4 h-4 text-gray-500 mr-1" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {data.distance.toFixed(2)}
-              </p>
-              <p className="text-xs text-gray-500">距离 (km)</p>
+      <main className="px-4 py-4 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm p-4">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center py-2">
+              <Clock className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+              <p className="text-xl font-bold text-slate-800">{formatTime(data.duration)}</p>
+              <p className="text-xs text-slate-500">时长</p>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <Clock className="w-4 h-4 text-gray-500 mr-1" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {Math.floor(data.duration / 60)}:{String(data.duration % 60).padStart(2, "0")}
-              </p>
-              <p className="text-xs text-gray-500">时长 (min)</p>
+            <div className="text-center py-2">
+              <p className="text-xl font-bold text-slate-800">{data.distance.toFixed(2)}</p>
+              <p className="text-xs text-slate-500">km</p>
             </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-1">
-                <Leaf className="w-4 h-4 text-green-500 mr-1" />
-              </div>
-              <p className="text-2xl font-bold text-green-500">
-                {data.carbonReduction.toFixed(0)}
-              </p>
-              <p className="text-xs text-gray-500">减碳 (g)</p>
+            <div className="text-center py-2">
+              <Leaf className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
+              <p className="text-xl font-bold text-emerald-600">{data.carbonReduction.toFixed(0)}g</p>
+              <p className="text-xs text-slate-500">减碳</p>
             </div>
           </div>
         </div>
-      </div>
 
-      <main className="px-4 py-6 space-y-6">
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">运动模式</h2>
+        <div className="h-48 rounded-2xl overflow-hidden shadow-sm">
+          <EcoMap onArrive={() => {}} />
+        </div>
+
+        <div className="flex justify-center">
+          <button
+            onClick={handleStart}
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              isActive
+                ? "bg-gradient-to-br from-red-400 to-red-500 shadow-lg"
+                : "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg hover:shadow-emerald-500/30"
+            }`}
+          >
+            {isActive ? (
+              <Pause className="w-8 h-8 text-white" />
+            ) : (
+              <Play className="w-8 h-8 text-white ml-1" />
+            )}
+          </button>
+        </div>
+
+        <p className="text-center text-sm text-slate-500">
+          {isActive ? "正在记录..." : "点击开始"}
+        </p>
+
+        <section className="bg-white rounded-2xl shadow-sm p-4">
+          <h2 className="section-title mb-3">运动模式</h2>
           <div className="grid grid-cols-3 gap-3">
             {Object.entries(modeConfig).map(([key, config]) => {
               const Icon = config.icon;
@@ -126,22 +128,14 @@ export default function ActivityTracker() {
                 <button
                   key={key}
                   onClick={() => setMode(key as typeof mode)}
-                  className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
+                  className={`p-3 rounded-xl border-2 transition-all ${
                     isSelected
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 bg-gray-50"
+                      ? "border-emerald-400 bg-emerald-50"
+                      : "border-slate-100 bg-slate-50"
                   }`}
                 >
-                  <Icon
-                    className={`w-6 h-6 mb-1 ${
-                      isSelected ? config.color : "text-gray-400"
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium ${
-                      isSelected ? "text-green-600" : "text-gray-500"
-                    }`}
-                  >
+                  <Icon className={`w-6 h-6 mx-auto mb-1 ${isSelected ? config.color : "text-slate-400"}`} />
+                  <span className={`text-xs font-medium ${isSelected ? config.color : "text-slate-500"}`}>
                     {config.label}
                   </span>
                 </button>
@@ -150,35 +144,11 @@ export default function ActivityTracker() {
           </div>
         </section>
 
-        <div className="flex justify-center">
-          <button
-            onClick={handleStart}
-            className={`w-20 h-20 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95 ${
-              isActive
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-            }`}
-          >
-            {isActive ? (
-              <Pause className="w-10 h-10 text-white" />
-            ) : (
-              <Play className="w-10 h-10 text-white ml-1" />
-            )}
-          </button>
-        </div>
+        <MetricsTranslator calories={Math.round(data.caloriesBurned * 10)} carbon={data.carbonReduction / 1000} />
 
-        <div className="text-center">
-          <p className="text-sm text-gray-500">
-            {isActive
-              ? "正在记录运动数据..."
-              : "点击开始记录您的低碳出行"}
-          </p>
-        </div>
-
-        <div className="bg-green-50 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-green-800 mb-2">探索乡村地图</h3>
-          <p className="text-xs text-green-600">
-            点击地图上的标记查看驿站和打卡点，模拟到达可触发低碳打卡！
+        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4">
+          <p className="text-sm text-slate-600">
+            点击地图上的标记可查看驿站和打卡点
           </p>
         </div>
       </main>

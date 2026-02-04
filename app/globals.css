@@ -4,36 +4,150 @@
 
 :root {
   --eco-green: #10B981;
-  --earth-brown: #D97706;
+  --eco-green-light: #34D399;
+  --eco-green-dark: #059669;
+  --harvest-gold: #FBBF24;
+  --harvest-gold-light: #FCD34D;
+  --warm-stone: #FAFAF9;
+  --deep-slate: #1E293B;
+  --soft-slate: #64748B;
 }
 
-body {
-  @apply bg-gray-50;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  html {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* 移动端适配 */
-@media (max-width: 640px) {
   body {
-    font-size: 14px;
+    @apply bg-stone-50 text-slate-800;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(16, 185, 129, 0.08), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(251, 191, 36, 0.05), transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight font-bold text-slate-800;
   }
 }
 
-/* 隐藏滚动条但保持滚动功能 */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+@layer components {
+  .card {
+    @apply bg-white/90 backdrop-blur-md rounded-3xl border border-white/50 shadow-lg shadow-emerald-900/5;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-300 hover:shadow-xl hover:shadow-emerald-900/10 hover:-translate-y-0.5;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-2xl
+           shadow-lg shadow-emerald-600/20 active:scale-95 transition-all duration-200
+           hover:shadow-emerald-600/30 hover:from-emerald-600 hover:to-emerald-700;
+  }
+
+  .btn-secondary {
+    @apply bg-white/80 backdrop-blur-sm text-slate-700 font-medium rounded-2xl border border-slate-200/50
+           shadow-sm shadow-slate-200/50 active:scale-95 transition-all duration-200
+           hover:bg-white hover:shadow-md;
+  }
+
+  .btn-gold {
+    @apply bg-gradient-to-r from-amber-400 to-amber-500 text-white font-semibold rounded-2xl
+           shadow-lg shadow-amber-500/20 active:scale-95 transition-all duration-200
+           hover:shadow-amber-500/30 hover:from-amber-500 hover:to-amber-600;
+  }
+
+  .stat-value {
+    @apply font-extrabold tracking-tight;
+  }
+
+  .section-title {
+    @apply text-lg font-bold tracking-tight text-slate-800;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-slate-500;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .tag-green {
+    @apply tag bg-emerald-100/80 text-emerald-700;
+  }
+
+  .tag-gold {
+    @apply tag bg-amber-100/80 text-amber-700;
+  }
+
+  .tag-slate {
+    @apply tag bg-slate-100/80 text-slate-600;
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl;
+  }
+
+  .glass-dark {
+    @apply bg-slate-800/80 backdrop-blur-xl;
+  }
+
+  .divider {
+    @apply border-t border-slate-200/50;
+  }
+
+  .badge {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full text-lg;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-100 text-emerald-600;
+  }
+
+  .badge-gold {
+    @apply badge bg-amber-100 text-amber-600;
+  }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 bg-clip-text text-transparent;
+  }
 
-/* 安全区域适配（iOS） */
-.safe-area-inset-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-amber-400 to-amber-500 bg-clip-text text-transparent;
+  }
 
+  .shadow-eco {
+    @apply shadow-lg shadow-emerald-900/5;
+  }
+
+  .shadow-eco-lg {
+    @apply shadow-xl shadow-emerald-900/10;
+  }
+
+  .shadow-eco-gold {
+    @apply shadow-lg shadow-amber-500/15;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Coins,
   Leaf,
@@ -9,6 +9,12 @@ import {
   Bike,
   TreePine,
   MapPin,
+  Trophy,
+  Sun,
+  Moon,
+  Sunrise,
+  ChevronRight,
+  Zap,
 } from "lucide-react";
 import {
   BarChart,
@@ -23,6 +29,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import BottomNavigation from "./BottomNavigation";
+import CarbonGamificationCard from "./CarbonGamificationCard";
 
 const weeklyData = [
   { day: "周一", steps: 8500, coins: 120 },
@@ -95,147 +102,228 @@ const mockData = {
   ],
 };
 
-export default function Dashboard() {
-  const [data] = useState(mockData);
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return { text: "早安", icon: Sunrise, suffix: "减碳先锋" };
+  if (hour >= 12 && hour < 18) return { text: "午安", icon: Sun, suffix: "环保达人" };
+  return { text: "晚安", icon: Moon, suffix: "绿色先锋" };
+}
+
+function CircularProgress({
+  value,
+  max,
+  strokeColor,
+  size = 80,
+  strokeWidth = 8,
+  label,
+  unit,
+}: {
+  value: number;
+  max: number;
+  strokeColor: string;
+  size?: number;
+  strokeWidth?: number;
+  label: string;
+  unit: string;
+}) {
+  const percentage = Math.min((value / max) * 100, 100);
+  const circumference = 2 * Math.PI * ((size - strokeWidth) / 2);
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-eco-green/20 flex items-center justify-center text-xl">
-              {data.user.avatar}
+    <div className="relative flex flex-col items-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={(size - strokeWidth) / 2}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-slate-100"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={(size - strokeWidth) / 2}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-1000 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-xl font-extrabold text-slate-800">{value}</span>
+        <span className="text-xs text-slate-500">{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const [data] = useState(mockData);
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.icon;
+
+  return (
+    <div className="min-h-screen pb-20">
+      <header className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-stone-100" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(16,185,129,0.15),_transparent_50%)]" />
+        <div className="relative px-4 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/70 backdrop-blur-xl shadow-lg shadow-emerald-900/5 flex items-center justify-center text-2xl border border-white/50">
+                {data.user.avatar}
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">
+                  {greeting.text}，{data.user.name}
+                </p>
+                <p className="text-xs text-slate-400 flex items-center gap-1">
+                  <Trophy className="w-3 h-3 text-amber-500" />
+                  {greeting.suffix}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">{data.user.name}</p>
-              <p className="text-xs text-gray-500">欢迎回来</p>
+            <div className="flex items-center space-x-2 bg-gradient-to-r from-amber-100/80 to-orange-100/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-amber-200/50 shadow-lg shadow-amber-500/10">
+              <Coins className="w-5 h-5 text-amber-500 animate-pulse" />
+              <span className="text-xl font-extrabold text-amber-600">
+                {data.user.coins.toLocaleString()}
+              </span>
+              <span className="text-xs text-amber-600/70 font-medium">绿农币</span>
             </div>
           </div>
-          <div className="flex items-center space-x-2 bg-eco-green/10 px-3 py-1.5 rounded-full">
-            <Coins className="w-4 h-4 text-eco-green" />
-            <span className="text-sm font-semibold text-eco-green">
-              {data.user.coins.toLocaleString()}
-            </span>
-            <span className="text-xs text-eco-green">绿农币</span>
+
+          <div className="flex justify-between items-center gap-4">
+            <CircularProgress
+              value={data.today.carbonReduction}
+              max={10}
+              strokeColor="#10B981"
+              label="减碳"
+              unit="kg"
+            />
+            <CircularProgress
+              value={data.today.steps}
+              max={15000}
+              strokeColor="#3B82F6"
+              label="步数"
+              unit="步"
+            />
+            <CircularProgress
+              value={data.today.calories}
+              max={600}
+              strokeColor="#F97316"
+              label="卡路里"
+              unit="kcal"
+            />
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-4 space-y-4">
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">今日数据</h2>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col items-center p-3 bg-eco-green/5 rounded-xl">
-              <div className="w-12 h-12 rounded-full bg-eco-green/20 flex items-center justify-center mb-2">
-                <Leaf className="w-6 h-6 text-eco-green" />
+      <main className="px-4 py-6 space-y-6 -mt-2">
+        <CarbonGamificationCard initialTotalPoints={2580} initialUnclaimedPoints={120} />
+        
+        <section className="space-y-3">
+          <h2 className="section-title">精选路线</h2>
+          {data.recommendations.map((route) => (
+            <div
+              key={route.id}
+              className="card-hover p-4 flex items-center gap-4 cursor-pointer group"
+            >
+              <div className="text-4xl bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-3">
+                {route.image}
               </div>
-              <p className="text-2xl font-bold text-eco-green">{data.today.carbonReduction}</p>
-              <p className="text-xs text-gray-600 mt-1">减碳 (kg)</p>
-            </div>
-
-            <div className="flex flex-col items-center p-3 bg-blue-50 rounded-xl">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-2">
-                <Footprints className="w-6 h-6 text-blue-600" />
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">
+                  {route.title}
+                </h3>
+                <p className="text-sm text-slate-500 line-clamp-1">
+                  {route.description}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="tag-slate">{route.distance}</span>
+                  <span className="tag-gold">{route.reward}</span>
+                </div>
               </div>
-              <p className="text-2xl font-bold text-blue-600">
-                {(data.today.steps / 1000).toFixed(1)}k
-              </p>
-              <p className="text-xs text-gray-600 mt-1">步数</p>
+              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
             </div>
-
-            <div className="flex flex-col items-center p-3 bg-orange-50 rounded-xl">
-              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mb-2">
-                <Flame className="w-6 h-6 text-orange-600" />
-              </div>
-              <p className="text-2xl font-bold text-orange-600">{data.today.calories}</p>
-              <p className="text-xs text-gray-600 mt-1">卡路里</p>
-            </div>
-          </div>
+          ))}
         </section>
 
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
+        <section className="grid grid-cols-2 gap-4">
+          <button className="card-hover p-5 flex flex-col items-center justify-center gap-3 group cursor-pointer">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
+              <Bike className="w-7 h-7 text-white" />
+            </div>
+            <span className="font-semibold text-slate-700">开启骑行</span>
+            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+          </button>
+          <button className="card-hover p-5 flex flex-col items-center justify-center gap-3 group cursor-pointer">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform duration-300">
+              <TreePine className="w-7 h-7 text-white" />
+            </div>
+            <span className="font-semibold text-slate-700">植树打卡</span>
+            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-500 group-hover:translate-x-1 transition-all" />
+          </button>
+        </section>
+
+        <section className="card p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">数据分析</h2>
-            <span className="text-xs text-gray-500">最近 7 天</span>
+            <h2 className="section-title">数据分析</h2>
+            <span className="text-xs text-slate-400">最近 7 天</span>
           </div>
-          <div className="h-64">
+          <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} barSize={24}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <BarChart data={weeklyData} barSize={20}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                 <XAxis
                   dataKey="day"
-                  tick={{ fontSize: 12, fill: "#666" }}
-                  axisLine={{ stroke: "#e0e0e0" }}
+                  tick={{ fontSize: 11, fill: "#64748B" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <YAxis
                   yAxisId="left"
-                  tick={{ fontSize: 12, fill: "#3b82f6" }}
-                  axisLine={{ stroke: "#e0e0e0" }}
-                  label={{
-                    value: "步数",
-                    angle: -90,
-                    position: "insideLeft",
-                    style: { fill: "#3b82f6", fontSize: 12 },
-                  }}
+                  tick={{ fontSize: 11, fill: "#64748B" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <YAxis
                   yAxisId="right"
                   orientation="right"
-                  tick={{ fontSize: 12, fill: "#22c55e" }}
-                  axisLine={{ stroke: "#e0e0e0" }}
-                  label={{
-                    value: "绿农币",
-                    angle: 90,
-                    position: "insideRight",
-                    style: { fill: "#22c55e", fontSize: 12 },
-                  }}
+                  tick={{ fontSize: 11, fill: "#64748B" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
                     borderRadius: "12px",
                     border: "none",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
                   }}
                 />
-                <Legend
-                  wrapperStyle={{ paddingTop: "16px" }}
-                  formatter={(value) => (
-                    <span style={{ color: "#666", fontSize: 12 }}>
-                      {value === "steps" ? "每日步数" : "获得绿农币"}
-                    </span>
-                  )}
-                />
-                <Bar
-                  yAxisId="left"
-                  dataKey="steps"
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                  name="steps"
-                />
+                <Bar yAxisId="left" dataKey="steps" fill="#10B981" radius={[6, 6, 0, 0]} />
                 <Line
                   yAxisId="right"
                   type="monotone"
                   dataKey="coins"
-                  stroke="#22c55e"
+                  stroke="#F59E0B"
                   strokeWidth={3}
-                  dot={{ fill: "#22c55e", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, fill: "#16a34a" }}
-                  name="coins"
+                  dot={{ fill: "#F59E0B", r: 4 }}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100">
-            <p className="text-xs text-gray-600 text-center">
-              📈 运动越多，赚得越多！继续保持，你的努力都会被看见
-            </p>
-          </div>
         </section>
 
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
+        <section className="card p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">勋章墙</h2>
-            <span className="text-xs text-gray-500">
+            <h2 className="section-title">勋章墙</h2>
+            <span className="text-xs text-slate-400">
               {medals.filter((m) => m.unlocked).length}/{medals.length} 已解锁
             </span>
           </div>
@@ -243,35 +331,29 @@ export default function Dashboard() {
             {medals.map((medal) => (
               <div
                 key={medal.id}
-                className={`relative rounded-xl p-4 text-center transition-all ${
+                className={`relative rounded-2xl p-4 text-center transition-all duration-300 ${
                   medal.unlocked
-                    ? "bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200"
-                    : "bg-gray-100 border border-gray-200 grayscale opacity-60"
+                    ? "bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-lg shadow-amber-500/10"
+                    : "bg-slate-50 border border-slate-200 opacity-60"
                 }`}
               >
-                <div
-                  className={`text-4xl mb-2 ${
-                    medal.unlocked ? "" : "filter grayscale"
-                  }`}
-                >
-                  {medal.icon}
-                </div>
+                <div className="text-4xl mb-2">{medal.icon}</div>
                 <p
-                  className={`text-sm font-semibold ${
-                    medal.unlocked ? "text-gray-900" : "text-gray-500"
+                  className={`text-sm font-bold ${
+                    medal.unlocked ? "text-slate-800" : "text-slate-500"
                   }`}
                 >
                   {medal.name}
                 </p>
                 <p
                   className={`text-xs mt-1 ${
-                    medal.unlocked ? "text-amber-600" : "text-gray-400"
+                    medal.unlocked ? "text-amber-600" : "text-slate-400"
                   }`}
                 >
                   {medal.description}
                 </p>
                 {medal.unlocked && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                     <svg
                       className="w-3 h-3 text-white"
                       fill="none"
@@ -287,63 +369,6 @@ export default function Dashboard() {
                     </svg>
                   </div>
                 )}
-                {!medal.unlocked && (
-                  <div className="mt-2">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div
-                        className="bg-gray-400 h-1.5 rounded-full"
-                        style={{
-                          width: `${(medal.current / medal.requirement) * 100}%`,
-                        }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {medal.current}/{medal.requirement}
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid grid-cols-2 gap-3">
-          <button className="bg-gradient-to-br from-eco-green to-emerald-600 text-white rounded-2xl p-4 shadow-md flex flex-col items-center justify-center space-y-2 active:scale-95 transition-transform">
-            <Bike className="w-8 h-8" />
-            <span className="font-semibold">开启低碳骑行</span>
-          </button>
-          <button className="bg-gradient-to-br from-earth-brown to-amber-600 text-white rounded-2xl p-4 shadow-md flex flex-col items-center justify-center space-y-2 active:scale-95 transition-transform">
-            <TreePine className="w-8 h-8" />
-            <span className="font-semibold">上传植树打卡</span>
-          </button>
-        </section>
-
-        <section className="bg-white rounded-2xl p-4 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">今日低碳助农路线推荐</h2>
-          <div className="space-y-3">
-            {data.recommendations.map((route) => (
-              <div
-                key={route.id}
-                className="bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl p-4 border border-eco-green/20"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="text-4xl">{route.image}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-gray-900">{route.title}</h3>
-                      <span className="text-xs bg-eco-green text-white px-2 py-0.5 rounded-full">
-                        {route.reward}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">{route.description}</p>
-                    <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-3 h-3" />
-                        <span>{route.distance}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             ))}
           </div>

@@ -16,6 +16,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import FarmerStorySection from "./FarmerStorySection";
 
 interface Product {
   id: number;
@@ -233,66 +234,8 @@ export default function ProductDetail() {
           )}
 
           {activeTab === "traceability" && (
-            <div className="p-4 space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                  农人故事
-                </h3>
-                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-                  <div className="w-16 h-16 bg-amber-200 rounded-full flex items-center justify-center text-3xl">
-                    {mockProduct.farmer?.avatar}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      {mockProduct.farmer?.name}
-                    </p>
-                    <p className="text-sm text-amber-700 font-medium">
-                      "{mockProduct.farmer?.story}"
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      深耕有机农业 {mockProduct.farmer?.years} 年
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                  生长日记
-                </h3>
-                <div className="relative pl-4">
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-eco-green to-emerald-200" />
-
-                  {mockProduct.timeline?.map((item, index) => (
-                    <div key={item.stage} className="relative pb-6 last:pb-0">
-                      <div className="absolute left-[-21px] top-1 w-10 h-10 bg-white border-2 border-eco-green rounded-full flex items-center justify-center text-lg shadow-sm z-10">
-                        {item.icon}
-                      </div>
-                      <div className="ml-8 pt-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-eco-green">
-                            {item.stage}
-                          </span>
-                          <span className="text-xs text-gray-400 flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {item.date}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-200">
-                <ShieldCheck className="w-5 h-5 text-green-600" />
-                <span className="text-sm text-green-700">
-                  所有节点均可溯源，信息真实可查
-                </span>
-              </div>
+            <div className="p-4">
+              <FarmerStorySection />
             </div>
           )}
         </div>

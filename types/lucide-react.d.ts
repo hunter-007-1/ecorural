@@ -42,4 +42,22 @@ declare module 'lucide-react' {
   export const Trophy: Icon;
   export const Star: Icon;
   export const Zap: Icon;
+  export const Moon: Icon;
+  export const Sunrise: Icon;
+  export const ChevronRight: Icon;
+  export const ChevronLeft: Icon;
+  export const Heart: Icon;
+  export const Sparkles: Icon;
+  export const Quote: Icon;
+  export const HandHeart: Icon;
+  export const ClipboardCheck: Icon;
+  export const X: Icon;
+  export const Sandwich: Icon;
+  export const Snowflake: Icon;
+  export const Info: Icon;
+  export const ChefHat: Icon;
+  export const Globe: Icon;
+  export const Lock: Icon;
+  export const Eye: Icon;
+  export const EyeOff: Icon;
 }
