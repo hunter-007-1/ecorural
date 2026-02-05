@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Play, Pause, Clock, Leaf, Footprints, Bike, Bus } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import MetricsTranslator from "./MetricsTranslator";
+import { logActivity } from "@/lib/supabase";
 
 const EcoMap = dynamic(() => import("./EcoMap"), {
   ssr: false,
@@ -25,11 +26,22 @@ const mockData = {
   caloriesBurned: 0,
 };
 
-export default function ActivityTracker() {
+interface ActivityTrackerProps {
+  userId?: string;
+}
+
+export default function ActivityTracker({ userId }: ActivityTrackerProps) {
   const [isActive, setIsActive] = useState(false);
   const [data, setData] = useState(mockData);
   const [mode, setMode] = useState<"walking" | "cycling" | "transit">("walking");
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     if (isActive) {
@@ -59,6 +71,29 @@ export default function ActivityTracker() {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleSave = async () => {
+    if (data.distance === 0 || data.duration === 0) {
+      showToast('请先开始记录运动', 'error');
+      return;
+    }
+
+    if (!userId) {
+      showToast('请先登录', 'error');
+      return;
+    }
+
+    setSaving(true);
+    const result = await logActivity(userId, Math.round(data.distance * 1000), data.carbonReduction / 1000, mode);
+    setSaving(false);
+
+    if (result.success) {
+      showToast(`已保存！减碳 ${data.carbonReduction.toFixed(1)}g`, 'success');
+      setData(mockData);
+    } else {
+      showToast(result.error || '保存失败', 'error');
+    }
   };
 
   const modeConfig = {
@@ -97,7 +132,7 @@ export default function ActivityTracker() {
           <EcoMap onArrive={() => {}} />
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-4">
           <button
             onClick={handleStart}
             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
@@ -112,10 +147,21 @@ export default function ActivityTracker() {
               <Play className="w-8 h-8 text-white ml-1" />
             )}
           </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || (data.distance === 0 && data.duration === 0)}
+            className="w-16 h-16 rounded-full flex items-center justify-center transition-all bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg hover:shadow-amber-500/30 disabled:opacity-50 disabled:shadow-none"
+          >
+            {saving ? (
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Leaf className="w-6 h-6 text-white" />
+            )}
+          </button>
         </div>
 
         <p className="text-center text-sm text-slate-500">
-          {isActive ? "正在记录..." : "点击开始"}
+          {isActive ? "正在记录..." : saving ? "保存中..." : "点击开始或打卡"}
         </p>
 
         <section className="bg-white rounded-2xl shadow-sm p-4">
@@ -152,6 +198,16 @@ export default function ActivityTracker() {
           </p>
         </div>
       </main>
+
+      {toast && (
+        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full shadow-lg text-sm font-medium z-50 ${
+          toast.type === 'success' 
+            ? 'bg-emerald-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          {toast.message}
+        </div>
+      )}
 
       <BottomNavigation />
     </div>

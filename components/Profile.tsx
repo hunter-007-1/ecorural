@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Leaf,
@@ -11,79 +11,120 @@ import {
   Calendar,
   MapPin,
   Clock,
+  ShoppingBag,
 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import BadgeGallery from "./BadgeGallery";
+import { getUserInventory, getUserActivities } from "@/lib/supabase";
 
-// Mock Data
-const mockData = {
-  user: {
-    name: "张三",
-    avatar: "👤",
-    totalCarbonReduction: 125.8,
-  },
-  badges: [
-    { id: 1, name: "减碳先锋", icon: "🏆", description: "累计减碳超过100kg" },
-    { id: 2, name: "绿色出行", icon: "🌱", description: "连续7天低碳出行" },
-    { id: 3, name: "助农达人", icon: "🌾", description: "兑换农产品超过10次" },
-  ],
-  orders: [
-    {
-      id: 1,
-      product: "高山有机红薯",
-      status: "待发货",
-      date: "2024-03-15",
-      image: "🍠",
-    },
-    {
-      id: 2,
-      product: "有机苹果",
-      status: "待收货",
-      date: "2024-03-12",
-      image: "🍎",
-    },
-    {
-      id: 3,
-      product: "新鲜有机白菜",
-      status: "已完成",
-      date: "2024-03-10",
-      image: "🥬",
-    },
-  ],
-  activities: [
-    {
-      id: 1,
-      type: "骑行",
-      distance: 5.2,
-      duration: 25,
-      carbonReduction: 1.2,
-      date: "2024-03-15",
-      route: "环湖绿道",
-    },
-    {
-      id: 2,
-      type: "步行",
-      distance: 3.5,
-      duration: 45,
-      carbonReduction: 0.8,
-      date: "2024-03-14",
-      route: "山间步道",
-    },
-    {
-      id: 3,
-      type: "骑行",
-      distance: 8.1,
-      duration: 35,
-      carbonReduction: 1.8,
-      date: "2024-03-13",
-      route: "乡村公路",
-    },
-  ],
-};
+interface UserProfile {
+  id: string;
+  name: string;
+  avatar: string;
+  total_carbon_reduction: number;
+  points: number;
+}
 
-export default function Profile() {
-  const [data] = useState(mockData);
-  const [activeTab, setActiveTab] = useState<"orders" | "activities">("orders");
+interface ProfileProps {
+  userId?: string;
+  initialData?: UserProfile;
+}
+
+export default function Profile({ userId, initialData }: ProfileProps) {
+  const [user, setUser] = useState<UserProfile | null>(initialData || null);
+  const [activeTab, setActiveTab] = useState<"orders" | "activities" | "inventory">("orders");
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      if (userId) {
+        const inv = await getUserInventory(userId);
+        const act = await getUserActivities(userId);
+        setInventory(inv);
+        setActivities(act);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, [userId]);
+
+  const mockData = {
+    user: {
+      name: user?.name || "张三",
+      avatar: user?.avatar || "👤",
+      totalCarbonReduction: user?.total_carbon_reduction || 125.8,
+    },
+    badges: [
+      { id: 1, name: "减碳先锋", icon: "🏆", description: "累计减碳超过100kg" },
+      { id: 2, name: "绿色出行", icon: "🌱", description: "连续7天低碳出行" },
+      { id: 3, name: "助农达人", icon: "🌾", description: "兑换农产品超过10次" },
+    ],
+    orders: [
+      {
+        id: 1,
+        product: "高山有机红薯",
+        status: "待发货",
+        date: "2024-03-15",
+        image: "🍠",
+      },
+      {
+        id: 2,
+        product: "有机苹果",
+        status: "待收货",
+        date: "2024-03-12",
+        image: "🍎",
+      },
+      {
+        id: 3,
+        product: "新鲜有机白菜",
+        status: "已完成",
+        date: "2024-03-10",
+        image: "🥬",
+      },
+    ],
+    activities: activities.length > 0 ? activities : [
+      {
+        id: 1,
+        type: "骑行",
+        distance: 5.2,
+        duration: 25,
+        carbonReduction: 1.2,
+        date: "2024-03-15",
+        route: "环湖绿道",
+      },
+      {
+        id: 2,
+        type: "步行",
+        distance: 3.5,
+        duration: 45,
+        carbonReduction: 0.8,
+        date: "2024-03-14",
+        route: "山间步道",
+      },
+      {
+        id: 3,
+        type: "骑行",
+        distance: 8.1,
+        duration: 35,
+        carbonReduction: 1.8,
+        date: "2024-03-13",
+        route: "乡村公路",
+      },
+    ],
+  };
+
+  const displayOrders = inventory.length > 0 
+    ? inventory.map((item: any) => ({
+        id: item.id,
+        product: item.products?.name || "未知商品",
+        status: "待发货",
+        date: new Date(item.purchased_at).toLocaleDateString('zh-CN'),
+        image: item.products?.image_url || "📦",
+      }))
+    : mockData.orders;
+  const data = mockData;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -136,6 +177,16 @@ export default function Profile() {
               我的订单
             </button>
             <button
+              onClick={() => setActiveTab("inventory")}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
+                activeTab === "inventory"
+                  ? "bg-eco-green text-white"
+                  : "text-gray-600"
+              }`}
+            >
+              我的背包
+            </button>
+            <button
               onClick={() => setActiveTab("activities")}
               className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
                 activeTab === "activities"
@@ -151,7 +202,7 @@ export default function Profile() {
         {/* 我的订单 */}
         {activeTab === "orders" && (
           <section className="space-y-3">
-            {data.orders.map((order) => (
+            {displayOrders.map((order) => (
               <div
                 key={order.id}
                 className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
@@ -187,6 +238,48 @@ export default function Profile() {
                 </div>
               </div>
             ))}
+          </section>
+        )}
+
+        {/* 我的背包 */}
+        {activeTab === "inventory" && (
+          <section className="space-y-3">
+            {loading ? (
+              <div className="bg-white rounded-2xl p-4 shadow-sm">
+                <p className="text-center text-gray-500">加载中...</p>
+              </div>
+            ) : inventory.length > 0 ? (
+              inventory.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center text-3xl">
+                      {item.products?.image_url || "🎁"}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {item.products?.name || "未知商品"}
+                      </h3>
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="inline-flex items-center space-x-1 text-xs bg-eco-green/10 text-eco-green px-2 py-0.5 rounded-full">
+                          <ShoppingBag className="w-3 h-3" />
+                          <span>x{item.quantity}</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        兑换时间: {new Date(item.purchased_at).toLocaleDateString('zh-CN')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-2xl p-4 shadow-sm">
+                <p className="text-center text-gray-500">暂无背包物品，去兑换一些商品吧！</p>
+              </div>
+            )}
           </section>
         )}
 

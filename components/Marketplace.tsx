@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
-import { fetchProducts } from "@/lib/supabase";
+import { fetchProducts, buyProduct } from "@/lib/supabase";
 
 interface Product {
   id: number;
@@ -18,14 +18,19 @@ interface Product {
 
 interface MarketplaceProps {
   onProductClick?: (product: Product) => void;
+  userId?: string;
+  initialPoints?: number;
+  onPointsUpdate?: (points: number) => void;
 }
 
 const categories = ["全部", "有机蔬菜", "时令水果", "乡村民宿", "手工艺品"];
 
-export default function Marketplace({ onProductClick }: MarketplaceProps) {
+export default function Marketplace({ onProductClick, userId, initialPoints = 0, onPointsUpdate }: MarketplaceProps) {
   const [selectedCategory, setSelectedCategory] = useState("全部");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [purchasingId, setPurchasingId] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     async function loadProducts() {
@@ -35,6 +40,35 @@ export default function Marketplace({ onProductClick }: MarketplaceProps) {
     }
     loadProducts();
   }, []);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handlePurchase = async (product: Product) => {
+    if (!userId) {
+      showToast('请先登录', 'error');
+      return;
+    }
+
+    if (product.price > initialPoints) {
+      showToast('积分不足', 'error');
+      return;
+    }
+
+    setPurchasingId(product.id);
+    const result = await buyProduct(userId, product.id);
+    setPurchasingId(null);
+
+    if (result.success) {
+      const newPoints = initialPoints - product.price;
+      onPointsUpdate?.(newPoints);
+      showToast(`成功兑换 ${product.name}！`, 'success');
+    } else {
+      showToast(result.error || '兑换失败', 'error');
+    }
+  };
 
   const filteredProducts =
     selectedCategory === "全部"
@@ -107,9 +141,20 @@ export default function Marketplace({ onProductClick }: MarketplaceProps) {
                       {product.price}
                     </span>
                   </div>
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-                    <ArrowRight className="w-3 h-3 text-white" />
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePurchase(product);
+                    }}
+                    disabled={purchasingId === product.id}
+                    className="w-7 h-7 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform disabled:opacity-50"
+                  >
+                    {purchasingId === product.id ? (
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ArrowRight className="w-3 h-3 text-white" />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -130,6 +175,16 @@ export default function Marketplace({ onProductClick }: MarketplaceProps) {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full shadow-lg text-sm font-medium z-50 ${
+          toast.type === 'success' 
+            ? 'bg-emerald-500 text-white' 
+            : 'bg-red-500 text-white'
+        }`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
