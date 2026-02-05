@@ -53,7 +53,7 @@ export default function AuthPage() {
           password: formData.password,
           options: {
             data: {
-              username: formData.username,
+              full_name: formData.username,
             },
           },
         });
