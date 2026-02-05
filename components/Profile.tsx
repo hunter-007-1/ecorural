@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   User,
   Leaf,
@@ -15,7 +16,7 @@ import {
 } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
 import BadgeGallery from "./BadgeGallery";
-import { getUserInventory, getUserActivities } from "@/lib/supabase";
+import { getUserInventory, getUserActivities, signOut } from "@/lib/supabase";
 
 interface UserProfile {
   id: string;
@@ -31,11 +32,13 @@ interface ProfileProps {
 }
 
 export default function Profile({ userId, initialData }: ProfileProps) {
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(initialData || null);
   const [activeTab, setActiveTab] = useState<"orders" | "activities" | "inventory">("orders");
   const [inventory, setInventory] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -49,6 +52,24 @@ export default function Profile({ userId, initialData }: ProfileProps) {
     }
     loadData();
   }, [userId]);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    
+    try {
+      const { error } = await signOut();
+      if (error) {
+        alert("退出登录失败，请稍后重试");
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      alert("退出登录失败，请稍后重试");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   const mockData = {
     user: {
@@ -323,6 +344,20 @@ export default function Profile({ userId, initialData }: ProfileProps) {
           </section>
         )}
       </main>
+
+      <div className="px-4 pb-24">
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className={`w-full py-3 px-4 rounded-xl font-medium text-white transition-all ${
+            isLoggingOut
+              ? "bg-red-400 cursor-not-allowed"
+              : "bg-red-500 hover:bg-red-600 active:scale-95"
+          }`}
+        >
+          {isLoggingOut ? "正在退出..." : "退出登录"}
+        </button>
+      </div>
 
       <BottomNavigation />
     </div>
