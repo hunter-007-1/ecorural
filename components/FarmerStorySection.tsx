@@ -15,6 +15,7 @@ import {
   Award,
   Heart,
 } from "lucide-react";
+import { fetchStories } from "@/lib/supabase";
 
 interface FarmImage {
   id: number;
@@ -46,70 +47,6 @@ interface FarmerStory {
 interface FarmerStorySectionProps {
   story?: FarmerStory;
 }
-
-const mockFarmerStory: FarmerStory = {
-  id: "farmer-zhang",
-  name: "张大伯",
-  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-  location: "北京市·平谷区·大华山镇",
-  experience: "30年种植经验",
-  quote:
-    "这是俺们自家种的红富士，没打蜡，虽然长得不俊，但味儿正！感谢城里人的支持！",
-  rating: 4.9,
-  reviews: 328,
-  images: [
-    {
-      id: 1,
-      url: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=600&h=400&fit=crop",
-      alt: "苹果园全景",
-    },
-    {
-      id: 2,
-      url: "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?w=600&h=400&fit=crop",
-      alt: "采摘苹果",
-    },
-    {
-      id: 3,
-      url: "https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=600&h=400&fit=crop",
-      alt: "果园实拍",
-    },
-    {
-      id: 4,
-      url: "https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?w=600&h=400&fit=crop",
-      alt: "农家生活",
-    },
-  ],
-  timeline: [
-    {
-      stage: "萌芽",
-      month: "3月",
-      icon: "sprout",
-      description: "施用农家肥，人工除草",
-      date: "2024-03-15",
-    },
-    {
-      stage: "生长",
-      month: "6月",
-      icon: "sun",
-      description: "物理防虫，无农药残留",
-      date: "2024-06-20",
-    },
-    {
-      stage: "丰收",
-      month: "9月",
-      icon: "heart",
-      description: "张大伯亲自采摘甄选",
-      date: "2024-09-25",
-    },
-    {
-      stage: "检测",
-      month: "10月",
-      icon: "check",
-      description: "通过绿色食品SGS检测",
-      date: "2024-10-10",
-    },
-  ],
-};
 
 function getTimelineIcon(icon: string) {
   const iconMap: Record<string, JSX.Element> = {
@@ -218,20 +155,43 @@ function Lightbox({
 }
 
 export default function FarmerStorySection({
-  story = mockFarmerStory,
+  story: initialStory,
 }: FarmerStorySectionProps) {
+  const [story, setStory] = useState<FarmerStory | null>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStories() {
+      const data = await fetchStories();
+      if (data.length > 0) {
+        const firstStory = data[0];
+        const storyWithImages: FarmerStory = {
+          ...firstStory,
+          images: firstStory.images || [],
+          timeline: firstStory.timeline || [],
+        };
+        setStory(storyWithImages);
+      }
+      setLoading(false);
+    }
+    loadStories();
+  }, []);
+
+  const displayStory = story || initialStory;
 
   const handleNext = () => {
+    if (!displayStory) return;
     setCurrentImageIndex((prev) =>
-      prev === story.images.length - 1 ? 0 : prev + 1
+      prev === displayStory.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const handlePrev = () => {
+    if (!displayStory) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? story.images.length - 1 : prev - 1
+      prev === 0 ? displayStory.images.length - 1 : prev - 1
     );
   };
 
@@ -239,6 +199,26 @@ export default function FarmerStorySection({
     setCurrentImageIndex(index);
     setLightboxOpen(true);
   };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-3xl shadow-lg shadow-emerald-900/5 border border-slate-100 overflow-hidden p-5">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-slate-200 rounded w-1/3"></div>
+          <div className="flex gap-4">
+            <div className="w-24 h-24 bg-slate-200 rounded-full"></div>
+            <div className="flex-1 space-y-3">
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+              <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+              <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!displayStory) return null;
 
   return (
     <>

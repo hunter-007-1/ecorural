@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
 import BottomNavigation from "./BottomNavigation";
+import { fetchProducts } from "@/lib/supabase";
 
 interface Product {
   id: number;
@@ -21,96 +22,24 @@ interface MarketplaceProps {
 
 const categories = ["全部", "有机蔬菜", "时令水果", "乡村民宿", "手工艺品"];
 
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    name: "高山有机红薯",
-    price: 500,
-    category: "有机蔬菜",
-    origin: "平谷区镇罗营镇",
-    image: "🍠",
-    tag: "助农·滞销帮扶",
-    sold: 234,
-  },
-  {
-    id: 2,
-    name: "新鲜有机白菜",
-    price: 300,
-    category: "有机蔬菜",
-    origin: "密云区",
-    image: "🥬",
-    tag: "有机认证",
-    sold: 189,
-  },
-  {
-    id: 3,
-    name: "有机苹果",
-    price: 800,
-    category: "时令水果",
-    origin: "延庆区",
-    image: "🍎",
-    tag: "自然熟",
-    sold: 156,
-  },
-  {
-    id: 4,
-    name: "有机草莓",
-    price: 1200,
-    category: "时令水果",
-    origin: "昌平区",
-    image: "🍓",
-    tag: "当季限定",
-    sold: 89,
-  },
-  {
-    id: 5,
-    name: "乡村民宿体验券",
-    price: 2000,
-    category: "乡村民宿",
-    origin: "怀柔区",
-    image: "🏡",
-    tag: "周末度假",
-    sold: 45,
-  },
-  {
-    id: 6,
-    name: "手工编织篮",
-    price: 600,
-    category: "手工艺品",
-    origin: "门头沟区",
-    image: "🧺",
-    tag: "非遗传承",
-    sold: 67,
-  },
-  {
-    id: 7,
-    name: "有机胡萝卜",
-    price: 400,
-    category: "有机蔬菜",
-    origin: "顺义区",
-    image: "🥕",
-    tag: "新鲜直达",
-    sold: 112,
-  },
-  {
-    id: 8,
-    name: "有机橙子",
-    price: 900,
-    category: "时令水果",
-    origin: "大兴区",
-    image: "🍊",
-    tag: "爆汁甜蜜",
-    sold: 78,
-  },
-];
-
 export default function Marketplace({ onProductClick }: MarketplaceProps) {
   const [selectedCategory, setSelectedCategory] = useState("全部");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      const data = await fetchProducts();
+      setProducts(data);
+      setLoading(false);
+    }
+    loadProducts();
+  }, []);
 
   const filteredProducts =
     selectedCategory === "全部"
-      ? mockProducts
-      : mockProducts.filter((p) => p.category === selectedCategory);
+      ? products
+      : products.filter((p) => p.category === selectedCategory);
 
   const handleProductClick = (product: Product) => {
     if (onProductClick) {
