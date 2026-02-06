@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Coins, Leaf, Flame, User, ShoppingBag } from "lucide-react";
+import { getUserProfile } from "@/lib/supabase";
 import supabase from "@/lib/supabase";
 import CarbonGamificationCard from "@/components/CarbonGamificationCard";
 import Marketplace from "@/components/Marketplace";
@@ -47,18 +48,10 @@ export default function Home() {
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching profile:", error);
-      }
+      const profile = await getUserProfile(session.user.id);
 
       if (profile) {
-        setUser(profile);
+        setUser(profile as UserProfile);
       } else {
         setShowLoginPrompt(true);
       }
@@ -74,11 +67,11 @@ export default function Home() {
     router.push("/login");
   };
 
-  const handleProductClick = (product: { id: number; name: string; price: number; image: string }) => {
+  const handleProductClick = (product: { id: number; name: string; price: number; image_url: string }) => {
     setSelectedProduct({
       name: product.name,
       price: product.price,
-      image: product.image,
+      image: product.image_url,
     });
     setShowExchangePopup(true);
   };
@@ -91,6 +84,12 @@ export default function Home() {
     }
     setShowExchangePopup(false);
     setSelectedProduct(null);
+  };
+
+  const handlePointsUpdate = (newPoints: number) => {
+    if (user) {
+      setUser({ ...user, points: newPoints });
+    }
   };
 
   if (loading) {
@@ -128,7 +127,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* 顶部用户信息 */}
       <header className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-stone-100">
         <div className="relative px-4 py-6">
           <div className="flex items-center justify-between mb-6">
@@ -172,40 +170,40 @@ export default function Home() {
       </header>
 
       <main className="px-4 py-6 space-y-8 -mt-2">
-        {/* 碳树养成卡片 */}
         <section>
           <CarbonGamificationCard
             initialTotalPoints={user?.points || 0}
-            initialUnclaimedPoints={50}
+            initialUnclaimedPoints={0}
           />
         </section>
 
-        {/* 助农市集 */}
         <section>
           <div className="flex items-center gap-2 mb-4">
             <ShoppingBag className="w-5 h-5 text-emerald-600" />
             <h2 className="text-lg font-bold text-slate-800">助农市集</h2>
             <span className="text-xs text-slate-400 ml-auto">用积分换好物</span>
           </div>
-          <Marketplace onProductClick={handleProductClick} />
+          <Marketplace 
+            onProductClick={handleProductClick} 
+            userId={user?.id}
+            initialPoints={user?.points || 0}
+            onPointsUpdate={handlePointsUpdate}
+          />
         </section>
 
-        {/* 农户故事 */}
         <section>
           <h2 className="text-lg font-bold text-slate-800 mb-4">农户故事</h2>
           <FarmerStorySection />
         </section>
 
-        {/* 活动追踪 */}
         <section>
           <h2 className="text-lg font-bold text-slate-800 mb-4">运动记录</h2>
-          <ActivityTracker />
+          <ActivityTracker userId={user?.id} />
         </section>
       </main>
 
       <BottomNavigation />
 
-      {/* 兑换弹窗 */}
       {showExchangePopup && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">

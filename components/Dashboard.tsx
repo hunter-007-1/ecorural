@@ -30,77 +30,8 @@ import {
 } from "recharts";
 import BottomNavigation from "./BottomNavigation";
 import CarbonGamificationCard from "./CarbonGamificationCard";
-
-const weeklyData = [
-  { day: "周一", steps: 8500, coins: 120 },
-  { day: "周二", steps: 6200, coins: 80 },
-  { day: "周三", steps: 9800, coins: 150 },
-  { day: "周四", steps: 7500, coins: 100 },
-  { day: "周五", steps: 11200, coins: 180 },
-  { day: "周六", steps: 15600, coins: 280 },
-  { day: "周日", steps: 8900, coins: 140 },
-];
-
-const medals = [
-  {
-    id: 1,
-    name: "减碳先锋",
-    icon: "🏆",
-    description: "累计减碳 10kg",
-    requirement: 10,
-    current: 15.5,
-    unlocked: true,
-  },
-  {
-    id: 2,
-    name: "助农大使",
-    icon: "🌾",
-    description: "兑换 5 次农产品",
-    requirement: 5,
-    current: 3,
-    unlocked: false,
-  },
-  {
-    id: 3,
-    name: "周末行者",
-    icon: "🚶",
-    description: "连续 4 周周末有运动",
-    requirement: 4,
-    current: 2,
-    unlocked: false,
-  },
-];
-
-const mockData = {
-  user: {
-    name: "张三",
-    avatar: "👤",
-    coins: 2580,
-  },
-  today: {
-    carbonReduction: 2.5,
-    steps: 8520,
-    calories: 320,
-  },
-  recommendations: [
-    {
-      id: 1,
-      title: "环湖绿道 x 助农采摘",
-      description: "5km 环湖骑行路线，终点可参与有机蔬菜采摘",
-      image: "🌾",
-      distance: "5km",
-      reward: "+50 绿农币",
-    },
-    {
-      id: 2,
-      title: "山间步道 x 生态农场",
-      description: "3km 山间步道，参观生态农场，了解有机农业",
-      image: "🏔️",
-      distance: "3km",
-      reward: "+30 绿农币",
-    },
-  ],
-};
+import { useUserData, useRoutes } from "@/hooks/useUserData";
+import { supabase } from "@/lib/supabase";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -156,17 +87,96 @@ function CircularProgress({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl font-extrabold text-slate-800">{value}</span>
+        <span className="text-xl font-extrabold text-slate-800">{value.toFixed(1)}</span>
         <span className="text-xs text-slate-500">{unit}</span>
       </div>
     </div>
   );
 }
 
-export default function Dashboard() {
-  const [data] = useState(mockData);
+interface DashboardProps {
+  userId?: string;
+}
+
+export default function Dashboard({ userId }: DashboardProps) {
+  const { profile, activities, medals, weeklyData, loading, error, refreshActivities } = useUserData(userId);
+  const { routes, loading: routesLoading } = useRoutes();
   const greeting = getGreeting();
   const GreetingIcon = greeting.icon;
+
+  const todayStats = activities[0];
+  const todayCarbonReduction = todayStats?.carbon_saved || 0;
+  const todaySteps = todayStats?.steps || 0;
+  const todayCalories = todayStats?.calories_burned || 0;
+  const userPoints = profile?.points || 0;
+  const userName = profile?.username || "用户";
+  const userCarbonSaved = profile?.carbon_saved || 0;
+
+  const defaultWeeklyData = [
+    { day: "周一", steps: 8500, coins: 120 },
+    { day: "周二", steps: 6200, coins: 80 },
+    { day: "周三", steps: 9800, coins: 150 },
+    { day: "周四", steps: 7500, coins: 100 },
+    { day: "周五", steps: 11200, coins: 180 },
+    { day: "周六", steps: 15600, coins: 280 },
+    { day: "周日", steps: 8900, coins: 140 },
+  ];
+
+  const displayWeeklyData = weeklyData.length > 0 ? weeklyData : defaultWeeklyData;
+
+  const displayMedals = medals.length > 0 ? medals : [
+    {
+      id: 1,
+      medal_id: "carbon_pioneer",
+      medal_name: "减碳先锋",
+      medal_icon: "🏆",
+      medal_description: "累计减碳 10kg",
+      current_progress: 15.5,
+      requirement: 10,
+      is_unlocked: true,
+    },
+    {
+      id: 2,
+      medal_id: "farmer_ambassador",
+      medal_name: "助农大使",
+      medal_icon: "🌾",
+      medal_description: "兑换 5 次农产品",
+      current_progress: 3,
+      requirement: 5,
+      is_unlocked: false,
+    },
+    {
+      id: 3,
+      medal_id: "weekend_hiker",
+      medal_name: "周末行者",
+      medal_icon: "🚶",
+      medal_description: "连续 4 周周末有运动",
+      current_progress: 2,
+      requirement: 4,
+      is_unlocked: false,
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-slate-500">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center text-red-500">
+          <p>加载失败，请刷新重试</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-20">
@@ -177,11 +187,11 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-2xl bg-white/70 backdrop-blur-xl shadow-lg shadow-emerald-900/5 flex items-center justify-center text-2xl border border-white/50">
-                {data.user.avatar}
+                👤
               </div>
               <div>
                 <p className="text-sm text-slate-500">
-                  {greeting.text}，{data.user.name}
+                  {greeting.text}，{userName}
                 </p>
                 <p className="text-xs text-slate-400 flex items-center gap-1">
                   <Trophy className="w-3 h-3 text-amber-500" />
@@ -192,7 +202,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-2 bg-gradient-to-r from-amber-100/80 to-orange-100/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-amber-200/50 shadow-lg shadow-amber-500/10">
               <Coins className="w-5 h-5 text-amber-500 animate-pulse" />
               <span className="text-xl font-extrabold text-amber-600">
-                {data.user.coins.toLocaleString()}
+                {userPoints.toLocaleString()}
               </span>
               <span className="text-xs text-amber-600/70 font-medium">绿农币</span>
             </div>
@@ -200,21 +210,21 @@ export default function Dashboard() {
 
           <div className="flex justify-between items-center gap-4">
             <CircularProgress
-              value={data.today.carbonReduction}
+              value={todayCarbonReduction}
               max={10}
               strokeColor="#10B981"
               label="减碳"
               unit="kg"
             />
             <CircularProgress
-              value={data.today.steps}
+              value={todaySteps}
               max={15000}
               strokeColor="#3B82F6"
               label="步数"
               unit="步"
             />
             <CircularProgress
-              value={data.today.calories}
+              value={todayCalories}
               max={600}
               strokeColor="#F97316"
               label="卡路里"
@@ -225,11 +235,28 @@ export default function Dashboard() {
       </header>
 
       <main className="px-4 py-6 space-y-6 -mt-2">
-        <CarbonGamificationCard initialTotalPoints={2580} initialUnclaimedPoints={120} />
+        <CarbonGamificationCard initialTotalPoints={userPoints} initialUnclaimedPoints={Math.round(todayCarbonReduction * 10)} />
         
         <section className="space-y-3">
           <h2 className="section-title">精选路线</h2>
-          {data.recommendations.map((route) => (
+          {(routes.length > 0 ? routes.slice(0, 2) : [
+            {
+              id: 1,
+              title: "环湖绿道 x 助农采摘",
+              description: "5km 环湖骑行路线，终点可参与有机蔬菜采摘",
+              image: "🌾",
+              distance: "5km",
+              reward_coins: 50,
+            },
+            {
+              id: 2,
+              title: "山间步道 x 生态农场",
+              description: "3km 山间步道，参观生态农场，了解有机农业",
+              image: "🏔️",
+              distance: "3km",
+              reward_coins: 30,
+            },
+          ]).map((route: any) => (
             <div
               key={route.id}
               className="card-hover p-4 flex items-center gap-4 cursor-pointer group"
@@ -245,8 +272,8 @@ export default function Dashboard() {
                   {route.description}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="tag-slate">{route.distance}</span>
-                  <span className="tag-gold">{route.reward}</span>
+                  <span className="tag-slate">{route.distance_km || route.distance}km</span>
+                  <span className="tag-gold">+{route.reward_coins || route.reward_coins} 绿农币</span>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
@@ -278,7 +305,7 @@ export default function Dashboard() {
           </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} barSize={20}>
+              <BarChart data={displayWeeklyData} barSize={20}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                 <XAxis
                   dataKey="day"
@@ -324,35 +351,35 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="section-title">勋章墙</h2>
             <span className="text-xs text-slate-400">
-              {medals.filter((m) => m.unlocked).length}/{medals.length} 已解锁
+              {displayMedals.filter((m) => m.is_unlocked).length}/{displayMedals.length} 已解锁
             </span>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {medals.map((medal) => (
+            {displayMedals.map((medal) => (
               <div
                 key={medal.id}
                 className={`relative rounded-2xl p-4 text-center transition-all duration-300 ${
-                  medal.unlocked
+                  medal.is_unlocked
                     ? "bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-lg shadow-amber-500/10"
                     : "bg-slate-50 border border-slate-200 opacity-60"
                 }`}
               >
-                <div className="text-4xl mb-2">{medal.icon}</div>
+                <div className="text-4xl mb-2">{medal.medal_icon}</div>
                 <p
                   className={`text-sm font-bold ${
-                    medal.unlocked ? "text-slate-800" : "text-slate-500"
+                    medal.is_unlocked ? "text-slate-800" : "text-slate-500"
                   }`}
                 >
-                  {medal.name}
+                  {medal.medal_name}
                 </p>
                 <p
                   className={`text-xs mt-1 ${
-                    medal.unlocked ? "text-amber-600" : "text-slate-400"
+                    medal.is_unlocked ? "text-amber-600" : "text-slate-400"
                   }`}
                 >
-                  {medal.description}
+                  {medal.medal_description}
                 </p>
-                {medal.unlocked && (
+                {medal.is_unlocked && (
                   <div className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                     <svg
                       className="w-3 h-3 text-white"

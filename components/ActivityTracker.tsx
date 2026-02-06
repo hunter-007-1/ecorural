@@ -85,11 +85,13 @@ export default function ActivityTracker({ userId }: ActivityTrackerProps) {
     }
 
     setSaving(true);
-    const result = await logActivity(userId, Math.round(data.distance * 1000), data.carbonReduction / 1000, mode);
+    const steps = Math.round(data.distance * 1000);
+    const carbonSaved = data.carbonReduction / 1000;
+    const result = await logActivity(userId, steps, carbonSaved, mode, data.duration);
     setSaving(false);
 
     if (result.success) {
-      showToast(`已保存！减碳 ${data.carbonReduction.toFixed(1)}g`, 'success');
+      showToast(`已保存！减碳 ${data.carbonReduction.toFixed(1)}g，获得 ${Math.round(carbonSaved * 10)} 绿农币`, 'success');
       setData(mockData);
     } else {
       showToast(result.error || '保存失败', 'error');

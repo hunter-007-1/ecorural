@@ -11,9 +11,10 @@ interface Product {
   price: number;
   category: string;
   origin: string;
-  image: string;
+  image_url: string;
   tag: string;
   sold: number;
+  stock: number;
 }
 
 interface MarketplaceProps {
@@ -31,6 +32,11 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
   const [loading, setLoading] = useState(true);
   const [purchasingId, setPurchasingId] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [currentPoints, setCurrentPoints] = useState(initialPoints);
+
+  useEffect(() => {
+    setCurrentPoints(initialPoints);
+  }, [initialPoints]);
 
   useEffect(() => {
     async function loadProducts() {
@@ -52,8 +58,13 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
       return;
     }
 
-    if (product.price > initialPoints) {
+    if (product.price > currentPoints) {
       showToast('积分不足', 'error');
+      return;
+    }
+
+    if (product.stock <= 0) {
+      showToast('商品已售罄', 'error');
       return;
     }
 
@@ -62,7 +73,8 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
     setPurchasingId(null);
 
     if (result.success) {
-      const newPoints = initialPoints - product.price;
+      const newPoints = currentPoints - product.price;
+      setCurrentPoints(newPoints);
       onPointsUpdate?.(newPoints);
       showToast(`成功兑换 ${product.name}！`, 'success');
     } else {
@@ -112,7 +124,7 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
               <div className="relative aspect-square overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent z-10" />
                 <div className="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-emerald-50/50 to-teal-50/50 transition-transform duration-500 group-hover:scale-105">
-                  {product.image}
+                  {product.image_url}
                 </div>
                 <div className="absolute top-2 left-2 z-20">
                   <span className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-emerald-700 shadow-sm">
