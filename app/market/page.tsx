@@ -28,21 +28,29 @@ export default function MarketPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      console.log("开始请求 Supabase 数据...");
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .order("created_at", { ascending: false });
+
+      console.log("Supabase Data:", data);
+      console.log("Error:", error);
 
       if (error) {
         console.error("Error fetching products:", error);
         return;
       }
 
+      console.log("原始数据条数:", data?.length || 0);
+
       setProducts(data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
+      console.log("Loading 状态:", false);
     }
   };
 
@@ -50,6 +58,9 @@ export default function MarketPage() {
     selectedCategory === "全部"
       ? products
       : products.filter((p) => p.category === selectedCategory);
+
+  console.log("当前分类:", selectedCategory);
+  console.log("过滤后数据条数:", filteredProducts.length);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -121,9 +132,19 @@ export default function MarketPage() {
           </div>
         )}
 
-        {!loading && filteredProducts.length === 0 && (
+        {!loading && filteredProducts.length === 0 && products.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">数据库中没有商品数据，请先添加</p>
+            <p className="text-gray-400 text-sm mt-2">请检查 Supabase products 表是否有数据</p>
+          </div>
+        )}
+
+        {!loading && filteredProducts.length === 0 && products.length > 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">暂无该分类商品</p>
+            <p className="text-gray-400 text-sm mt-2">
+              当前分类: {selectedCategory}，共 {products.length} 条数据
+            </p>
           </div>
         )}
       </main>
