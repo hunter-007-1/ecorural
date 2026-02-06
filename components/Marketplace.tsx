@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
-import { fetchProducts, buyProduct } from "@/lib/supabase";
 
 interface Product {
   id: number;
@@ -23,6 +22,34 @@ interface MarketplaceProps {
   onPointsUpdate?: (points: number) => void;
 }
 
+const MOCK_PRODUCTS: Product[] = [
+  { id: 1, name: "高山有机土豆", price: 30, category: "有机蔬菜", origin: "云南山区", image_url: "🥔", tag: "热销", sold: 156, stock: 50 },
+  { id: 2, name: "新鲜大白菜", price: 15, category: "有机蔬菜", origin: "山东田园", image_url: "🥬", tag: "新鲜", sold: 89, stock: 30 },
+  { id: 3, name: "农家胡萝卜", price: 18, category: "有机蔬菜", origin: "内蒙古", image_url: "🥕", tag: "有机", sold: 67, stock: 45 },
+  { id: 4, name: "纯天然菠菜", price: 12, category: "有机蔬菜", origin: "河北", image_url: "🥬", tag: "绿色", sold: 45, stock: 60 },
+  { id: 5, name: "新鲜番茄", price: 22, category: "有机蔬菜", origin: "新疆", image_url: "🍅", tag: "当季", sold: 78, stock: 40 },
+  { id: 6, name: "有机青椒", price: 20, category: "有机蔬菜", origin: "贵州", image_url: "🫑", tag: "特惠", sold: 34, stock: 25 },
+
+  { id: 7, name: "红富士苹果", price: 45, category: "时令水果", origin: "陕西洛川", image_url: "🍎", tag: "精品", sold: 234, stock: 100 },
+  { id: 8, name: "巨峰葡萄", price: 60, category: "时令水果", origin: "新疆吐鲁番", image_url: "🍇", tag: "热销", sold: 189, stock: 80 },
+  { id: 9, name: "香甜草莓", price: 80, category: "时令水果", origin: "辽宁丹东", image_url: "🍓", tag: "新品", sold: 156, stock: 50 },
+  { id: 10, name: "新疆哈密瓜", price: 35, category: "时令水果", origin: "新疆哈密", image_url: "🍈", tag: "当季", sold: 98, stock: 60 },
+  { id: 11, name: "贵妃芒果", price: 55, category: "时令水果", origin: "海南三亚", image_url: "🥭", tag: "热带", sold: 123, stock: 45 },
+  { id: 12, name: "红心火龙果", price: 40, category: "时令水果", origin: "广西", image_url: "🔥", tag: "进口", sold: 76, stock: 35 },
+
+  { id: 13, name: "农家散养土鸡蛋", price: 50, category: "乡村民宿", origin: "江西农村", image_url: "🥚", tag: "散养", sold: 312, stock: 200 },
+  { id: 14, name: "放养土鸡", price: 150, category: "乡村民宿", origin: "湖南农村", image_url: "🐔", tag: "土特产", sold: 45, stock: 20 },
+  { id: 15, name: "农家自产蜂蜜", price: 120, category: "乡村民宿", origin: "四川", image_url: "🍯", tag: "纯天然", sold: 89, stock: 30 },
+  { id: 16, name: "农村散养鸭蛋", price: 45, category: "乡村民宿", origin: "江苏", image_url: "🥚", tag: "生态", sold: 56, stock: 40 },
+  { id: 17, name: "手工豆腐", price: 25, category: "乡村民宿", origin: "安徽", image_url: "🧈", tag: "传统", sold: 67, stock: 50 },
+
+  { id: 18, name: "手工竹编篮", price: 120, category: "手工艺品", origin: "浙江", image_url: "🧺", tag: "手工", sold: 34, stock: 15 },
+  { id: 19, name: "手工刺绣围巾", price: 180, category: "手工艺品", origin: "江苏苏州", image_url: "🧣", tag: "非遗", sold: 23, stock: 10 },
+  { id: 20, name: "陶艺花瓶", price: 250, category: "手工艺品", origin: "江西景德镇", image_url: "🏺", tag: "艺术", sold: 18, stock: 8 },
+  { id: 21, name: "手工木雕摆件", price: 320, category: "手工艺品", origin: "福建", image_url: "🪵", tag: "收藏", sold: 12, stock: 5 },
+  { id: 22, name: "草编帽子", price: 85, category: "手工艺品", origin: "山东", image_url: "👒", tag: "夏日", sold: 45, stock: 20 },
+];
+
 const categories = ["全部", "有机蔬菜", "时令水果", "乡村民宿", "手工艺品"];
 
 export default function Marketplace({ onProductClick, userId, initialPoints = 0, onPointsUpdate }: MarketplaceProps) {
@@ -38,12 +65,8 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
   }, [initialPoints]);
 
   useEffect(() => {
-    async function loadProducts() {
-      const data = await fetchProducts();
-      setProducts(data);
-      setLoading(false);
-    }
-    loadProducts();
+    setProducts(MOCK_PRODUCTS);
+    setLoading(false);
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -68,17 +91,13 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
     }
 
     setPurchasingId(product.id);
-    const result = await buyProduct(userId, product.id);
-    setPurchasingId(null);
-
-    if (result.success) {
+    setTimeout(() => {
       const newPoints = currentPoints - product.price;
       setCurrentPoints(newPoints);
       onPointsUpdate?.(newPoints);
+      setPurchasingId(null);
       showToast(`成功兑换 ${product.name}！`, 'success');
-    } else {
-      showToast(result.error || '兑换失败', 'error');
-    }
+    }, 500);
   };
 
   const filteredProducts =
@@ -190,8 +209,8 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
       {toast && (
         <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full shadow-lg text-sm font-medium z-50 ${
           toast.type === 'success' 
-            ? 'bg-emerald-500 text-white' 
-            : 'bg-red-500 text-white'
+            ? "bg-emerald-500 text-white" 
+            : "bg-red-500 text-white"
         }`}>
           {toast.message}
         </div>
