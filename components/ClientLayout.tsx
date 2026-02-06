@@ -5,7 +5,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const showBottomNav = pathname !== "/login" && pathname !== "/" && pathname !== "/market";
+  const showBottomNav = pathname !== "/login";
 
   return (
     <>
