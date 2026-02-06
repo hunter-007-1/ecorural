@@ -32,34 +32,27 @@ export default function MarketPage() {
       setLoading(true);
       console.log("开始请求 Supabase 数据...");
 
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
 
       console.log("Supabase Data:", data);
       console.log("Error:", error);
 
       if (error) {
-        console.error("Error fetching products:", error);
-        return;
+        console.error("Supabase Error:", error);
       }
 
       console.log("原始数据条数:", data?.length || 0);
-
       setProducts(data || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setProducts([]);
     } finally {
       setLoading(false);
-      console.log("Loading 状态:", false);
     }
   };
 
-  const filteredProducts =
-    selectedCategory === "全部"
-      ? products
-      : products.filter((p) => p.category === selectedCategory);
+  const filteredProducts = selectedCategory === "全部" ? products : products.filter((p) => p.category === selectedCategory);
 
   console.log("当前分类:", selectedCategory);
   console.log("过滤后数据条数:", filteredProducts.length);
