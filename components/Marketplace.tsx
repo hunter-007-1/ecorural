@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
-import BottomNavigation from "./BottomNavigation";
 import { fetchProducts, buyProduct } from "@/lib/supabase";
 
 interface Product {

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import BottomNavigation from "@/components/BottomNavigation";
 
 export const metadata: Metadata = {
   title: "乡健碳行 | EcoRural",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <main className="relative z-10 min-h-screen pb-20">
           {children}
         </main>
+        <BottomNavigation />
       </body>
     </html>
   );

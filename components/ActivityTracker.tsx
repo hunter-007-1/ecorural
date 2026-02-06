@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Play, Pause, Clock, Leaf, Footprints, Bike, Bus } from "lucide-react";
-import BottomNavigation from "./BottomNavigation";
 import MetricsTranslator from "./MetricsTranslator";
 import { logActivity } from "@/lib/supabase";
 
@@ -210,8 +209,6 @@ export default function ActivityTracker({ userId }: ActivityTrackerProps) {
           {toast.message}
         </div>
       )}
-
-      <BottomNavigation />
     </div>
   );
 }

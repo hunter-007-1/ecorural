@@ -15,7 +15,6 @@ import {
   Mountain,
   ShieldCheck,
 } from "lucide-react";
-import BottomNavigation from "./BottomNavigation";
 import FarmerStorySection from "./FarmerStorySection";
 
 interface Product {
@@ -259,8 +258,6 @@ export default function ProductDetail() {
           </div>
         </div>
       </main>
-
-      <BottomNavigation />
     </div>
   );
 }

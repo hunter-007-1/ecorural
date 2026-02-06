@@ -14,7 +14,6 @@ import {
   Clock,
   ShoppingBag,
 } from "lucide-react";
-import BottomNavigation from "./BottomNavigation";
 import BadgeGallery from "./BadgeGallery";
 import { getUserInventory, getUserOrders, getUserActivities, getUserProfile, signOut } from "@/lib/supabase";
 
@@ -356,8 +355,6 @@ export default function Profile({ userId }: ProfileProps) {
           {isLoggingOut ? "正在退出..." : "退出登录"}
         </button>
       </div>
-
-      <BottomNavigation />
     </div>
   );
 }

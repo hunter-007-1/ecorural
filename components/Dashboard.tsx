@@ -28,7 +28,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import BottomNavigation from "./BottomNavigation";
 import CarbonGamificationCard from "./CarbonGamificationCard";
 import { useUserData, useRoutes } from "@/hooks/useUserData";
 import { supabase } from "@/lib/supabase";
@@ -401,8 +400,6 @@ export default function Dashboard({ userId }: DashboardProps) {
           </div>
         </section>
       </main>
-
-      <BottomNavigation />
     </div>
   );
 }

@@ -9,7 +9,6 @@ import CarbonGamificationCard from "@/components/CarbonGamificationCard";
 import Marketplace from "@/components/Marketplace";
 import FarmerStorySection from "@/components/FarmerStorySection";
 import ActivityTracker from "@/components/ActivityTracker";
-import BottomNavigation from "@/components/BottomNavigation";
 
 interface UserProfile {
   id: string;
@@ -201,8 +200,6 @@ export default function Home() {
           <ActivityTracker userId={user?.id} />
         </section>
       </main>
-
-      <BottomNavigation />
 
       {showExchangePopup && selectedProduct && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4">
