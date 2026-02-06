@@ -1,61 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import supabase from "@/lib/supabase";
+import { useState } from "react";
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   category: string;
-  image_url: string;
-  description: string;
-  seller_id: string;
-  created_at: string;
+  image: string;
 }
+
+const MOCK_PRODUCTS: Product[] = [
+  { id: 1, name: "高山有机土豆", price: 30, category: "有机蔬菜", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=400" },
+  { id: 2, name: "农家散养土鸡蛋", price: 50, category: "乡村民宿", image: "https://images.unsplash.com/photo-1516467508483-a72120608ae0?w=400" },
+  { id: 3, name: "红富士苹果", price: 45, category: "时令水果", image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400" },
+  { id: 4, name: "新鲜大白菜", price: 15, category: "有机蔬菜", image: "https://images.unsplash.com/photo-1633341857850-2f166b567b57?w=400" },
+  { id: 5, name: "手工竹编篮", price: 120, category: "手工艺品", image: "https://images.unsplash.com/photo-1596464716127-f9a8656d7879?w=400" },
+  { id: 6, name: "巨峰葡萄", price: 60, category: "时令水果", image: "https://images.unsplash.com/photo-1537640538965-1756299f00f6?w=400" },
+];
 
 const categories = ["全部", "有机蔬菜", "时令水果", "乡村民宿", "手工艺品"];
 
-const DEFAULT_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23e5e7eb' width='100' height='100'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%239ca3af' font-size='12'%3E暂无图片%3C/text%3E%3C/svg%3E";
-
 export default function MarketPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("全部");
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      console.log("开始请求 Supabase 数据...");
-
-      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-
-      console.log("Supabase Data:", data);
-      console.log("Error:", error);
-
-      if (error) {
-        console.error("Supabase Error:", error);
-      }
-
-      console.log("原始数据条数:", data?.length || 0);
-      setProducts(data || []);
-
-    } catch (err) {
-      console.error("Fetch Error:", err);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredProducts = selectedCategory === "全部" ? products : products.filter((p) => p.category === selectedCategory);
-
-  console.log("当前分类:", selectedCategory);
-  console.log("过滤后数据条数:", filteredProducts.length);
+  const filteredProducts = selectedCategory === "全部" ? MOCK_PRODUCTS : MOCK_PRODUCTS.filter((p) => p.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -82,67 +51,41 @@ export default function MarketPage() {
           ))}
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden animate-pulse">
-                <div className="h-32 bg-gray-200" />
-                <div className="p-3 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+        <div className="grid grid-cols-2 gap-4">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="relative h-40">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-3">
+                <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-2">
+                  {product.name}
+                </h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold text-emerald-600">
+                    ¥{product.price}
+                  </span>
+                  <button className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center hover:bg-emerald-600 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-              >
-                <div className="relative h-32 overflow-hidden">
-                  <img
-                    src={product.image_url || DEFAULT_IMAGE}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = DEFAULT_IMAGE;
-                    }}
-                  />
-                </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900 text-sm line-clamp-2 mb-1">
-                    {product.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-2 truncate">
-                    {product.seller_id === "official" ? "官方自营" : `卖家: ${product.seller_id}`}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-emerald-600">
-                      {product.price}
-                    </span>
-                    <span className="text-xs text-gray-500">绿农币</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
 
-        {!loading && filteredProducts.length === 0 && products.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">数据库中没有商品数据，请先添加</p>
-            <p className="text-gray-400 text-sm mt-2">请检查 Supabase products 表是否有数据</p>
-          </div>
-        )}
-
-        {!loading && filteredProducts.length === 0 && products.length > 0 && (
+        {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">暂无该分类商品</p>
-            <p className="text-gray-400 text-sm mt-2">
-              当前分类: {selectedCategory}，共 {products.length} 条数据
-            </p>
           </div>
         )}
       </main>
