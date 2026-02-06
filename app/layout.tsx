@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNavigation from "@/components/BottomNavigation";
-import { usePathname } from "next/navigation";
+import ClientLayout from "@/components/ClientLayout";
 
 export const metadata: Metadata = {
   title: "乡健碳行 | EcoRural",
@@ -35,21 +35,5 @@ export default function RootLayout({
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
-  );
-}
-
-function ClientLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const showBottomNav = pathname !== "/login";
-
-  return (
-    <>
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(16,185,129,0.08),_transparent_50%)] pointer-events-none z-0" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(251,191,36,0.05),_transparent_50%)] pointer-events-none z-0" />
-      <main className="relative z-10 min-h-screen pb-20">
-        {children}
-      </main>
-      {showBottomNav && <BottomNavigation />}
-    </>
   );
 }
