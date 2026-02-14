@@ -112,6 +112,7 @@ export default function ProductDetail() {
 
   const handleConfirmPurchase = () => {
     setIsPurchasing(true);
+    // 本地模拟购买成功
     setTimeout(() => {
       setIsPurchasing(false);
       setShowConfirmModal(false);
@@ -120,7 +121,7 @@ export default function ProductDetail() {
       } else {
         alert(`购买成功！农民获得 ¥${farmerRevenue.toFixed(2)} 收益`);
       }
-    }, 1000);
+    }, 500);
   };
 
   return (
