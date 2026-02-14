@@ -15,7 +15,8 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import BadgeGallery from "./BadgeGallery";
-import { getUserInventory, getUserOrders, getUserActivities, getUserProfile, signOut } from "@/lib/supabase";
+import { getUserInventory, getUserOrders, getUserActivities, getUserProfile, getUserWithdrawals, signOut } from "@/lib/supabase";
+import WithdrawalModal from "./WithdrawalModal";
 
 interface UserProfile {
   id: string;
@@ -35,27 +36,31 @@ interface ProfileProps {
 export default function Profile({ userId }: ProfileProps) {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [activeTab, setActiveTab] = useState<"orders" | "activities" | "inventory">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "activities" | "inventory" | "withdrawals">("orders");
   const [inventory, setInventory] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [activities, setActivities] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       if (userId) {
-        const [profile, inv, ord, act] = await Promise.all([
+        const [profile, inv, ord, act, withdr] = await Promise.all([
           getUserProfile(userId),
           getUserInventory(userId),
           getUserOrders(userId),
-          getUserActivities(userId)
+          getUserActivities(userId),
+          getUserWithdrawals(userId)
         ]);
         
         if (profile) setUser(profile);
         setInventory(inv);
         setOrders(ord);
         setActivities(act);
+        setWithdrawals(withdr);
       }
       setLoading(false);
     }
@@ -172,6 +177,14 @@ export default function Profile({ userId }: ProfileProps) {
                   {displayCoins}
                 </p>
                 <p className="text-sm text-gray-600">绿农币</p>
+                {userId && displayCoins >= 2000 && (
+                  <button
+                    onClick={() => setShowWithdrawalModal(true)}
+                    className="mt-2 px-3 py-1 bg-amber-100 text-amber-600 text-xs font-medium rounded-full hover:bg-amber-200 transition-colors"
+                  >
+                    提现
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -210,6 +223,16 @@ export default function Profile({ userId }: ProfileProps) {
               }`}
             >
               我的足迹
+            </button>
+            <button
+              onClick={() => setActiveTab("withdrawals")}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${
+                activeTab === "withdrawals"
+                  ? "bg-eco-green text-white"
+                  : "text-gray-600"
+              }`}
+            >
+              提现记录
             </button>
           </div>
         </section>
@@ -351,6 +374,54 @@ export default function Profile({ userId }: ProfileProps) {
             )}
           </section>
         )}
+
+        {activeTab === "withdrawals" && (
+          <section className="space-y-3">
+            {loading ? (
+              <div className="bg-white rounded-2xl p-4 shadow-sm">
+                <p className="text-center text-gray-500">加载中...</p>
+              </div>
+            ) : withdrawals.length > 0 ? (
+              withdrawals.map((withdrawal: any) => (
+                <div
+                  key={withdrawal.id}
+                  className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">💰</span>
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          提现 ¥{withdrawal.amount_yuan?.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          消耗 {withdrawal.amount_coins} 积分
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      withdrawal.status === 'completed' 
+                        ? 'bg-green-100 text-green-700'
+                        : withdrawal.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {withdrawal.status === 'completed' ? '已完成' : 
+                       withdrawal.status === 'pending' ? '处理中' : '已拒绝'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {formatDate(withdrawal.created_at)}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-2xl p-4 shadow-sm">
+                <p className="text-center text-gray-500">暂无提现记录</p>
+              </div>
+            )}
+          </section>
+        )}
       </main>
 
       <div className="px-4 pb-24">
@@ -366,6 +437,16 @@ export default function Profile({ userId }: ProfileProps) {
           {isLoggingOut ? "正在退出..." : "退出登录"}
         </button>
       </div>
+
+      <WithdrawalModal
+        isOpen={showWithdrawalModal}
+        onClose={() => setShowWithdrawalModal(false)}
+        userId={userId}
+        userCoins={displayCoins}
+        onSuccess={(newCoins) => {
+          setUser(user ? { ...user, green_coins: newCoins } : null);
+        }}
+      />
     </div>
   );
 }
