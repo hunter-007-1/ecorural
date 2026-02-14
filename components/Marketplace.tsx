@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Coins, MapPin, Sparkles, ArrowRight } from "lucide-react";
+import { createOrderWithCoins, buyProductWithCash } from "@/lib/supabase";
 
 interface Product {
   id: number;
@@ -96,13 +97,22 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
       }
 
       setPurchasingId(product.id);
-      setTimeout(() => {
-        const newPoints = currentPoints - product.price;
-        setCurrentPoints(newPoints);
-        onPointsUpdate?.(newPoints);
+      
+      try {
+        const result = await createOrderWithCoins(userId, product.id, 1);
+        if (result.success) {
+          const newPoints = currentPoints - product.price;
+          setCurrentPoints(newPoints);
+          onPointsUpdate?.(newPoints);
+          showToast(`成功兑换 ${product.name}！`, 'success');
+        } else {
+          showToast(result.error || '兑换失败', 'error');
+        }
+      } catch (error) {
+        showToast('兑换失败，请稍后重试', 'error');
+      } finally {
         setPurchasingId(null);
-        showToast(`成功兑换 ${product.name}！`, 'success');
-      }, 500);
+      }
     } else {
       setSelectedProduct(product);
       setShowPurchaseModal(true);
@@ -121,11 +131,21 @@ export default function Marketplace({ onProductClick, userId, initialPoints = 0,
     }
 
     setPurchasingId(product.id);
-    setTimeout(() => {
+    
+    try {
+      const result = await buyProductWithCash(userId, product.id, 1);
+      if (result.success) {
+        const farmerRevenue = result.farmerRevenue || (product.price_in_yuan || product.price / 100) * 0.7;
+        showToast(`购买成功！农民获得 ¥${farmerRevenue.toFixed(2)} 收益`, 'success');
+        setShowPurchaseModal(false);
+      } else {
+        showToast(result.error || '购买失败', 'error');
+      }
+    } catch (error) {
+      showToast('购买失败，请稍后重试', 'error');
+    } finally {
       setPurchasingId(null);
-      setShowPurchaseModal(false);
-      showToast(`现金购买 ${product.name} 成功！农民获得收益 ₹${(product.price_in_yuan || product.price / 100) * 0.7}`, 'success');
-    }, 1000);
+    }
   };
 
   const filteredProducts =

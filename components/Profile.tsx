@@ -21,8 +21,10 @@ interface UserProfile {
   id: string;
   username: string | null;
   avatar_url: string | null;
-  carbon_saved: number;
-  points: number;
+  green_coins: number;
+  total_carbon_saved: number;
+  total_calories_burned: number;
+  user_title: string;
   email: string | null;
 }
 
@@ -91,7 +93,8 @@ export default function Profile({ userId }: ProfileProps) {
     return new Date(dateStr).toLocaleDateString('zh-CN');
   };
 
-  const displayCarbonSaved = user?.carbon_saved || 0;
+  const displayCarbonSaved = user?.total_carbon_saved || 0;
+  const displayCoins = user?.green_coins || 0;
   const displayUsername = user?.username || "用户";
 
   const mockActivities = [
@@ -157,11 +160,19 @@ export default function Profile({ userId }: ProfileProps) {
             <Leaf className="w-5 h-5 text-eco-green" />
           </div>
           <div className="bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl p-4">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-eco-green mb-1">
-                {displayCarbonSaved.toFixed(1)}
-              </p>
-              <p className="text-sm text-gray-600">累计减碳总量 (kg)</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-eco-green mb-1">
+                  {displayCarbonSaved.toFixed(1)}
+                </p>
+                <p className="text-sm text-gray-600">累计减碳 (kg)</p>
+              </div>
+              <div className="text-center">
+                <p className="text-3xl font-bold text-amber-500 mb-1">
+                  {displayCoins}
+                </p>
+                <p className="text-sm text-gray-600">绿农币</p>
+              </div>
             </div>
           </div>
 
