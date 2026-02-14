@@ -21,6 +21,7 @@ interface Product {
   id: number;
   name: string;
   price: number;
+  price_in_yuan?: number;
   category: string;
   origin: string;
   image: string;
@@ -43,6 +44,7 @@ const mockProduct: Product = {
   id: 1,
   name: "高山有机红薯",
   price: 500,
+  price_in_yuan: 5,
   category: "有机蔬菜",
   origin: "平谷区镇罗营镇",
   image: "🍠",
@@ -96,9 +98,29 @@ const activities = [
 export default function ProductDetail() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"detail" | "traceability">("detail");
+  const [purchaseMode, setPurchaseMode] = useState<'coins' | 'cash'>('coins');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+
+  const yuanPrice = mockProduct.price_in_yuan || mockProduct.price / 100;
+  const farmerRevenue = yuanPrice * 0.7;
+  const platformRevenue = yuanPrice * 0.3;
 
   const handleExchange = () => {
-    alert("兑换成功！您已使用 500 绿农币");
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmPurchase = () => {
+    setIsPurchasing(true);
+    setTimeout(() => {
+      setIsPurchasing(false);
+      setShowConfirmModal(false);
+      if (purchaseMode === 'coins') {
+        alert(`兑换成功！您已使用 ${mockProduct.price} 积分`);
+      } else {
+        alert(`购买成功！农民获得 ¥${farmerRevenue.toFixed(2)} 收益`);
+      }
+    }, 1000);
   };
 
   return (
@@ -138,17 +160,56 @@ export default function ProductDetail() {
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-eco-green/10 to-emerald-50 rounded-xl border border-eco-green/20">
               <div className="flex items-center space-x-2">
                 <Coins className="w-6 h-6 text-earth-brown" />
-                <span className="text-2xl font-bold text-earth-brown">
-                  {mockProduct.price}
-                </span>
-                <span className="text-gray-500">绿农币</span>
+                {purchaseMode === 'coins' ? (
+                  <>
+                    <span className="text-2xl font-bold text-earth-brown">
+                      {mockProduct.price}
+                    </span>
+                    <span className="text-gray-500">积分</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold text-green-600">
+                      ¥{yuanPrice.toFixed(2)}
+                    </span>
+                    <span className="text-gray-500">/现金</span>
+                  </>
+                )}
               </div>
               <div className="text-right">
-                <p className="text-xs text-gray-500">≈ 骑行 50km 奖励</p>
+                <p className="text-xs text-gray-500">
+                  {purchaseMode === 'coins' ? `≈ 骑行 50km 奖励` : '直接购买'}
+                </p>
                 <p className="text-xs text-eco-green font-medium">
-                  相当于流汗换来的 {mockProduct.price} 绿农币
+                  {purchaseMode === 'coins' 
+                    ? `相当于流汗换来的 ${mockProduct.price} 积分`
+                    : `农民可得 ¥${farmerRevenue.toFixed(2)} (70%)`
+                  }
                 </p>
               </div>
+            </div>
+
+            <div className="flex bg-slate-100 rounded-full p-1 mb-4">
+              <button
+                onClick={() => setPurchaseMode('coins')}
+                className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
+                  purchaseMode === 'coins'
+                    ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow"
+                    : "text-slate-600"
+                }`}
+              >
+                积分兑换
+              </button>
+              <button
+                onClick={() => setPurchaseMode('cash')}
+                className={`flex-1 py-2 rounded-full text-sm font-medium transition-all ${
+                  purchaseMode === 'cash'
+                    ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow"
+                    : "text-slate-600"
+                }`}
+              >
+                现金购买
+              </button>
             </div>
 
             <div className="flex gap-2">
@@ -171,9 +232,13 @@ export default function ProductDetail() {
 
             <button
               onClick={handleExchange}
-              className="w-full py-4 bg-gradient-to-r from-eco-green to-emerald-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform active:scale-95 transition-all"
+              className={`w-full py-4 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform active:scale-95 transition-all ${
+                purchaseMode === 'coins'
+                  ? "bg-gradient-to-r from-eco-green to-emerald-600"
+                  : "bg-gradient-to-r from-green-500 to-emerald-600"
+              }`}
             >
-              立即兑换
+              {purchaseMode === 'coins' ? '立即兑换' : '立即购买'}
             </button>
           </div>
         </div>
@@ -258,6 +323,74 @@ export default function ProductDetail() {
           </div>
         </div>
       </main>
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              {purchaseMode === 'coins' ? '确认兑换' : '确认购买'}
+            </h3>
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-14 h-14 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl flex items-center justify-center text-2xl">
+                  {mockProduct.image}
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{mockProduct.name}</p>
+                  <p className="text-sm text-gray-500">{mockProduct.origin}</p>
+                </div>
+              </div>
+              <div className="border-t pt-3">
+                {purchaseMode === 'coins' ? (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">兑换积分</span>
+                    <span className="font-bold text-amber-600">{mockProduct.price} 积分</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-500">商品价格</span>
+                      <span className="font-medium">¥{yuanPrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-500">农民可得 (70%)</span>
+                      <span className="font-medium text-green-600">¥{farmerRevenue.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">平台收益 (30%)</span>
+                      <span className="font-medium text-amber-600">¥{platformRevenue.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            {purchaseMode === 'cash' && (
+              <p className="text-xs text-gray-500 mb-4 text-center">
+                您的购买将直接帮助农民增收，支持低碳农业发展
+              </p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleConfirmPurchase}
+                disabled={isPurchasing}
+                className={`flex-1 py-3 text-white rounded-xl font-medium shadow-lg disabled:opacity-50 ${
+                  purchaseMode === 'coins'
+                    ? "bg-gradient-to-r from-eco-green to-emerald-600 shadow-emerald-500/25"
+                    : "bg-gradient-to-r from-green-500 to-emerald-500 shadow-green-500/25"
+                }`}
+              >
+                {isPurchasing ? '处理中...' : purchaseMode === 'coins' ? '确认兑换' : '确认购买'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
