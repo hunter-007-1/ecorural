@@ -14,8 +14,8 @@ interface UserProfile {
   id: string;
   email: string;
   username: string;
-  points: number;
-  carbon_saved: number;
+  green_coins: number;
+  total_carbon_saved: number;
   total_calories: number;
   user_title: string;
   avatar_url: string;
@@ -76,10 +76,10 @@ export default function Home() {
   };
 
   const handleExchangeConfirm = () => {
-    if (selectedProduct && user && user.points >= selectedProduct.price) {
+    if (selectedProduct && user && user.green_coins >= selectedProduct.price) {
       alert(`兑换成功！\n\n您已使用 ${selectedProduct.price} 绿农币兑换了 ${selectedProduct.name}\n\n（此为演示版本，实际兑换功能开发中）`);
     } else if (selectedProduct) {
-      alert(`绿农币不足！\n\n需要 ${selectedProduct.price} 绿农币，您当前有 ${user?.points || 0} 绿农币\n\n请多运动赚取积分！`);
+      alert(`绿农币不足！\n\n需要 ${selectedProduct.price} 绿农币，您当前有 ${user?.green_coins || 0} 绿农币\n\n请多运动赚取积分！`);
     }
     setShowExchangePopup(false);
     setSelectedProduct(null);
@@ -87,7 +87,7 @@ export default function Home() {
 
   const handlePointsUpdate = (newPoints: number) => {
     if (user) {
-      setUser({ ...user, points: newPoints });
+      setUser({ ...user, green_coins: newPoints });
     }
   };
 
@@ -147,7 +147,7 @@ export default function Home() {
             <div className="flex items-center space-x-2 bg-gradient-to-r from-amber-100 to-orange-100 backdrop-blur-xl px-4 py-2 rounded-2xl border border-amber-200/50 shadow-lg shadow-amber-500/10">
               <Coins className="w-5 h-5 text-amber-500" />
               <span className="text-xl font-extrabold text-amber-600">
-                {user?.points?.toLocaleString() || 0}
+                {user?.green_coins?.toLocaleString() || 0}
               </span>
               <span className="text-xs text-amber-600/70">绿农币</span>
             </div>
@@ -156,7 +156,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 text-center border border-white/50 shadow-lg shadow-emerald-900/5">
               <Leaf className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-slate-800">{user?.carbon_saved?.toFixed(1) || "0.0"}</p>
+              <p className="text-2xl font-bold text-slate-800">{user?.total_carbon_saved?.toFixed(1) || "0.0"}</p>
               <p className="text-xs text-slate-500">累计减碳 (kg)</p>
             </div>
             <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-4 text-center border border-white/50 shadow-lg shadow-emerald-900/5">
@@ -171,7 +171,7 @@ export default function Home() {
       <main className="px-4 py-6 space-y-8 -mt-2">
         <section>
           <CarbonGamificationCard
-            initialTotalPoints={user?.points || 0}
+            initialTotalPoints={user?.green_coins || 0}
             initialUnclaimedPoints={0}
           />
         </section>
@@ -185,7 +185,7 @@ export default function Home() {
           <Marketplace 
             onProductClick={handleProductClick} 
             userId={user?.id}
-            initialPoints={user?.points || 0}
+            initialPoints={user?.green_coins || 0}
             onPointsUpdate={handlePointsUpdate}
           />
         </section>

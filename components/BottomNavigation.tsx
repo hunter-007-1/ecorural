@@ -20,7 +20,7 @@ export default function BottomNavigation() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          
+
           return (
             <Link
               key={item.href}
@@ -33,7 +33,9 @@ export default function BottomNavigation() {
                 size={24}
                 className={isActive ? "text-eco-green" : "text-gray-500"}
               />
-              <span className={`text-xs mt-1 ${isActive ? "font-semibold" : ""}`}>
+              <span
+                className={`text-xs mt-1 ${isActive ? "font-semibold" : ""}`}
+              >
                 {item.label}
               </span>
             </Link>
@@ -43,6 +45,3 @@ export default function BottomNavigation() {
     </nav>
   );
 }
-
-
-
